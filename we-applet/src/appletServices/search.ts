@@ -1,9 +1,9 @@
 import {
-    AppAgentClient,
+    AppClient,
     decodeHashFromBase64,
 } from "@holochain/client";
 import {AppletHash, WAL} from "@lightningrodlabs/we-applet/dist/types";
-import {WeServices} from "@lightningrodlabs/we-applet/dist/api";
+import {WeaveServices} from "@lightningrodlabs/we-applet/dist/api";
 import {asCellProxy} from "@ddd-qc/we-utils";
 import {PlaysetProxy, SpaceOutput, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 
@@ -11,7 +11,7 @@ import {PlaysetProxy, SpaceOutput, WHERE_DEFAULT_ROLE_NAME} from "@where/element
 /**
  * Returns spaces that matchs the searchFilters
  */
-export async function search(appletClient: AppAgentClient, appletHash: AppletHash, weServices: WeServices, searchFilter: string): Promise<Array<WAL>> {
+export async function search(appletClient: AppClient, appletHash: AppletHash, weServices: WeaveServices, searchFilter: string): Promise<Array<WAL>> {
     console.log("Where/we-applet/search():", searchFilter);
     const searchLC = searchFilter.toLowerCase();
 

@@ -53,8 +53,13 @@ console.log("    HC_ADMIN_PORT =", HC_ADMIN_PORT);
 export class LudothequeStandaloneApp extends HappElement {
 
   /** Ctor */
-  constructor(port_or_socket?: number | AppWebsocket, appId?: InstalledAppId) {
-    super(port_or_socket? port_or_socket : HC_APP_PORT, appId);
+  constructor(appWs?: AppWebsocket, private _adminWs?: AdminWebsocket, appId?: InstalledAppId) {
+    const adminUrl = _adminWs
+      ? undefined
+      : HC_ADMIN_PORT
+        ? new URL(`ws://localhost:${HC_ADMIN_PORT}`)
+        : undefined;
+    super(appWs? appWs : HC_APP_PORT, appId, adminUrl);
   }
 
   static HVM_DEF = DEFAULT_LUDOTHEQUE_DEF;
@@ -73,16 +78,11 @@ export class LudothequeStandaloneApp extends HappElement {
 
   /** */
   async hvmConstructed() {
-    console.log("hvmConstructed()")
+    console.log("<ludotheque-app>.hvmConstructed()")
     /** Provide Context */
     new ContextProvider(this, cellContext, this.ludothequeDvm.cell);
     this.appProxy.addSignalHandler((sig) => this.onSignal(sig), this.ludothequeDvm.hcl.toString());
-    /** Authorize all zome calls */
-    const adminWs = await AdminWebsocket.connect(new URL(`ws://localhost:${HC_ADMIN_PORT}`));
-    //console.log({ adminWs });
-    await this.hvm.authorizeAllZomeCalls(adminWs);
-    console.log("*** Zome call authorization complete");
-    /* Send dnaHash to electron */
+    /** Send dnaHash to electron */
     if (HAPP_ENV == HappEnvType.Electron) {
       const ludoDnaHashB64 = this.ludothequeDvm.cell.dnaHash;
       //const ipc = window.require('electron').ipcRenderer;

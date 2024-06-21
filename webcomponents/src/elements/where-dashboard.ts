@@ -2,7 +2,7 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import {consume} from "@lit/context";
 
-import {CreatableType, Hrl, WeClient} from "@lightningrodlabs/we-applet";
+import {CreatableType, Hrl, WeaveClient} from "@lightningrodlabs/we-applet";
 
 import {sharedStyles} from "../sharedStyles";
 
@@ -181,7 +181,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     /** Get attachmentInfos */
     if (this.weServices) {
       const {groupsProfiles, appletsInfos} = await getAppletsInfosAndGroupsProfiles(
-        this.weServices as unknown as WeClient,
+        this.weServices as unknown as WeaveClient,
         [decodeHashFromBase64(this.weServices.appletId)],
       );
       this._appletsInfos = appletsInfos;
@@ -514,7 +514,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
       <div slot="title">Where</div>
       ${isInDev? html`
         <sl-tooltip slot="navigationIcon" content="Dump logs" placement="bottom" distance="4">
-            <mwc-icon-button id="dump-signals-button" icon="bug_report" @click=${() => this._dvm.dumpLogs()} ></mwc-icon-button>
+            <mwc-icon-button id="dump-signals-button" icon="bug_report" @click=${() => this._dvm.dumpSignalLogs()} ></mwc-icon-button>
         </sl-tooltip>
       ` : html``}
       <sl-tooltip slot="actionItems" content=${msg('Sync with network')} placement="bottom" distance="4">

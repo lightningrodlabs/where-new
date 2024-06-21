@@ -42,7 +42,7 @@ import "@material/mwc-circular-progress";
 import "@material/mwc-button";
 import "@material/mwc-dialog";
 import {Dialog} from "@material/mwc-dialog";
-import {AppletId, AppletView, WeServices} from "@lightningrodlabs/we-applet";
+import {AppletId, AppletView, WeaveServices} from "@lightningrodlabs/we-applet";
 import {ContextProvider} from "@lit/context";
 import {AppletInfo} from "@lightningrodlabs/we-applet/dist/types";
 import {AssetViewInfo, WeServicesEx} from "@ddd-qc/we-utils";
@@ -111,17 +111,18 @@ export class WhereApp extends HappElement {
   constructor(
       appWs?: AppWebsocket,
       private _adminWs?: AdminWebsocket,
-      private _canAuthorizeZfns?: boolean,
       appId?: InstalledAppId,
-      weServices?: WeServices,
+      weServices?: WeaveServices,
       thisAppletId?: AppletId,
       public appletView?: AppletView,
       profileInfo?: ProfileInfo,
   ) {
-    super(appWs? appWs : HC_APP_PORT, appId);
-    if (_canAuthorizeZfns == undefined) {
-      this._canAuthorizeZfns = true;
-    }
+    const adminUrl = _adminWs
+      ? undefined
+      : HC_ADMIN_PORT
+        ? new URL(`ws://localhost:${HC_ADMIN_PORT}`)
+        : undefined;
+    super(appWs? appWs : HC_APP_PORT, appId, adminUrl);
     if (weServices) {
       this._weServices = new WeServicesEx(weServices, thisAppletId);
       console.log(`\t\tProviding context "${weClientContext}" | in host `, this._weServices, this);
@@ -135,7 +136,7 @@ export class WhereApp extends HappElement {
 
   /** Create a Profiles DVM out of a different happ */
   async createWeProfilesDvm(profileInfo?: ProfileInfo): Promise<void> {
-    const profilesAppInfo = await profileInfo.profilesProxy.appInfo({installed_app_id: profileInfo.profilesAppId});
+    const profilesAppInfo = await profileInfo.profilesProxy.appInfo();
     const profilesDef: DvmDef = {ctor: ProfilesDvm, baseRoleName: profileInfo.profilesBaseRoleName, isClonable: false};
     const cell_infos = Object.values(profilesAppInfo.cell_info);
     console.log("createProfilesDvm() cell_infos:", cell_infos);
@@ -201,23 +202,7 @@ export class WhereApp extends HappElement {
 
   /** */
   async hvmConstructed() {
-    console.log("hvmConstructed()", this._adminWs, this._canAuthorizeZfns)
-    /** Authorize all zome calls */
-    if (!this._adminWs && this._canAuthorizeZfns) {
-      this._adminWs = await AdminWebsocket.connect({url:new URL(`ws://localhost:${HC_ADMIN_PORT}`)});
-      console.log("hvmConstructed() connect called", this._adminWs);
-    }
-    if (this._adminWs && this._canAuthorizeZfns) {
-      await this.hvm.authorizeAllZomeCalls(this._adminWs);
-      console.log("*** Zome call authorization complete");
-    } else {
-      if (!this._canAuthorizeZfns) {
-        console.warn("No adminWebsocket provided (Zome call authorization done)")
-      } else {
-        console.log("Zome call authorization done externally")
-
-      }
-    }
+    console.log("<where-app>.hvmConstructed()", this._adminWs)
     /** Send dnaHash to electron */
     if (HAPP_ENV == HappEnvType.Electron) {
       const whereDnaHashB64 = this.hvm.getDvm(WhereDvm.DEFAULT_BASE_ROLE_NAME)!.cell.dnaHash;
@@ -358,13 +343,13 @@ export class WhereApp extends HappElement {
           throw new Error("Where/we-applet: Block view is not implemented.");
         case "asset":
           const assetViewInfo = this.appletView as AssetViewInfo;
-          if (assetViewInfo.roleName != WHERE_DEFAULT_ROLE_NAME) {
-            throw new Error(`Where/we-applet: Unknown role name '${this.appletView.roleName}'.`);
+          if (assetViewInfo.recordInfo.roleName != WHERE_DEFAULT_ROLE_NAME) {
+            throw new Error(`Where/we-applet: Unknown role name '${this.appletView.recordInfo.roleName}'.`);
           }
           // if (assetViewInfo.integrityZomeName != WHERE_DEFAULT_INTEGRITY_ZOME_NAME /* || "playset_integrity"*/) {
           //   throw new Error(`Where/we-applet: Unknown zome '${this.appletView.integrityZomeName}'.`);
           // }
-          const entryType = pascal(assetViewInfo.entryType);
+          const entryType = pascal(assetViewInfo.recordInfo.entryType);
           console.log("pascal entryType", entryType);
           switch (entryType) {
             case PlaysetEntryType.Space:
@@ -374,7 +359,7 @@ export class WhereApp extends HappElement {
               view = html`<where-space .currentSpaceEh=${spaceEh}></where-space>`;
               break;
             default:
-              throw new Error(`Unhandled entry type ${assetViewInfo.entryType}.`);
+              throw new Error(`Unhandled entry type ${assetViewInfo.recordInfo.entryType}.`);
           }
           break;
         default:

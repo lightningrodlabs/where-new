@@ -1,32 +1,30 @@
 import {asCellProxy, wrapPathInSvg} from "@ddd-qc/we-utils";
-import {AppAgentClient, encodeHashToBase64, RoleName, ZomeName} from "@holochain/client";
+import {AppClient, encodeHashToBase64, RoleName, ZomeName} from "@holochain/client";
 import {PlaysetEntryType, PlaysetProxy, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 import {pascal} from "@ddd-qc/cell-proxy";
 import {mdiMapbox} from "@mdi/js";
-import {WAL} from "@lightningrodlabs/we-applet/dist/types";
+import {RecordInfo, WAL} from "@lightningrodlabs/we-applet/dist/types";
 
 
 /** */
 export async function getAssetInfo(
-  appletClient: AppAgentClient,
-  roleName: RoleName,
-  integrityZomeName: ZomeName,
-  entryType: string,
-  hrlc: WAL,
+  appletClient: AppClient,
+  wal: WAL,
+  recordInfo?: RecordInfo,
 ) {
-    if (roleName != WHERE_DEFAULT_ROLE_NAME) {
-        throw new Error(`Where/we-applet: Unknown role name '${roleName}'.`);
+    if (recordInfo.roleName != WHERE_DEFAULT_ROLE_NAME) {
+        throw new Error(`Where/we-applet: Unknown role name '${recordInfo.roleName}'.`);
     }
-    if (integrityZomeName != "playset_integrity") {
-        throw new Error(`Where/we-applet: Unknown zome '${integrityZomeName}'.`);
+    if (recordInfo.integrityZomeName != "playset_integrity") {
+        throw new Error(`Where/we-applet: Unknown zome '${recordInfo.integrityZomeName}'.`);
     }
 
     const mainAppInfo = await appletClient.appInfo();
-    const pEntryType = pascal(entryType);
+    const pEntryType = pascal(recordInfo.entryType);
 
     switch (pEntryType) {
         case PlaysetEntryType.Space: {
-            console.log("Where/we-applet: space info for", hrlc);
+            console.log("Where/we-applet: space info for", wal);
             const cellProxy = await asCellProxy(
                 appletClient,
                 undefined, //hrl[0],
@@ -34,7 +32,7 @@ export async function getAssetInfo(
                 WHERE_DEFAULT_ROLE_NAME,
             );
             const proxy: PlaysetProxy = new PlaysetProxy(cellProxy);
-            const space = await proxy.getSpace(encodeHashToBase64(hrlc.hrl[1]));
+            const space = await proxy.getSpace(encodeHashToBase64(wal.hrl[1]));
             if (!space) {
                 return;
             }
@@ -44,7 +42,7 @@ export async function getAssetInfo(
             };
         }
         default:
-            throw new Error(`Files/we-applet: Unknown entry type ${entryType}.`);
+            throw new Error(`Files/we-applet: Unknown entry type ${recordInfo.entryType}.`);
     }
 }
 

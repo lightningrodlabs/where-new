@@ -1,24 +1,24 @@
 import {
-  AppAgentWebsocket, encodeHashToBase64, InstalledAppId, ZomeName,
+  AppWebsocket,
+  encodeHashToBase64,
 } from "@holochain/client";
 //import { msg } from "@lit/localize";
 
 import {
   RenderInfo,
-  WeServices,
+  WeaveServices,
 } from "@lightningrodlabs/we-applet";
 
 
 import {ProfileInfo, WhereApp} from "@where/app";
 import {AppletViewInfo, ProfilesApi} from "@ddd-qc/we-utils";
 import {destructureCloneId, ExternalAppProxy, HCL} from "@ddd-qc/cell-proxy";
-import {AppProxy, BaseRoleName, CloneId} from "@ddd-qc/lit-happ";
 
 
 /** */
 export async function createWhereApplet(
   renderInfo: RenderInfo,
-  weServices: WeServices,
+  weServices: WeaveServices,
 ): Promise<WhereApp> {
 
   if (renderInfo.type =="cross-applet-view") {
@@ -31,8 +31,8 @@ export async function createWhereApplet(
   console.log("createWhereApplet() thisAppletId", encodeHashToBase64(appletViewInfo.appletHash));
   const mainAppInfo = await appletViewInfo.appletClient.appInfo();
   console.log("createWhereApplet() mainAppInfo", mainAppInfo);
-  const mainAppAgentWs = appletViewInfo.appletClient as AppAgentWebsocket;
-  const mainAppWs = mainAppAgentWs.appWebsocket;
+  const mainAppWs = appletViewInfo.appletClient as AppWebsocket;
+  //const mainAppWs = mainAppAgentWs.appWebsocket;
 
 
   /** Determine profilesAppInfo */
@@ -68,7 +68,6 @@ export async function createWhereApplet(
   const app = new WhereApp(
       mainAppWs,
       undefined,
-      false,
       mainAppInfo.installed_app_id,
       weServices,
       encodeHashToBase64(appletViewInfo.appletHash),

@@ -295,7 +295,8 @@ export class LudothequePage extends DnaElement<unknown, LudothequeDvm> {
 
   /** */
   async onDumpLogs() {
-    this._dvm.dumpLogs();
+    this._dvm.dumpCallLogs();
+    this._dvm.dumpSignalLogs();
   }
 
 

@@ -1,11 +1,12 @@
 import {
-  AppAgentWebsocket, encodeHashToBase64,
+  AppWebsocket,
+  encodeHashToBase64,
 } from "@holochain/client";
 //import { msg } from "@lit/localize";
 
 import {
   RenderInfo,
-  WeServices,
+  WeaveServices,
 } from "@lightningrodlabs/we-applet";
 
 
@@ -16,7 +17,7 @@ import {LudothequeStandaloneApp} from "ludotheque";
 /** */
 export async function createLudoApplet(
   renderInfo: RenderInfo,
-  weServices: WeServices,
+  weServices: WeaveServices,
 ): Promise<LudothequeStandaloneApp> {
 
   if (renderInfo.type =="cross-applet-view") {
@@ -29,11 +30,12 @@ export async function createLudoApplet(
   console.log("createLudoApplet() thisAppletId", encodeHashToBase64(appletViewInfo.appletHash));
   const mainAppInfo = await appletViewInfo.appletClient.appInfo();
   console.log("createLudoApplet() mainAppInfo", mainAppInfo);
-  const mainAppAgentWs = appletViewInfo.appletClient as AppAgentWebsocket;
-  const mainAppWs = mainAppAgentWs.appWebsocket;
+  const mainAppWs = appletViewInfo.appletClient as AppWebsocket;
+  //const mainAppWs = mainAppAgentWs.appWebsocket;
   /** Create WhereApp */
   const app = new LudothequeStandaloneApp(
       mainAppWs,
+    undefined,
       mainAppInfo.installed_app_id,
       );
   /** Done */

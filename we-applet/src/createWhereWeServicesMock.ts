@@ -3,7 +3,7 @@ import {
     encodeHashToBase64, EntryHash,
     fakeDnaHash, fakeEntryHash
 } from "@holochain/client";
-import {AppletInfo, GroupProfile, WeServices} from "@lightningrodlabs/we-applet";
+import {AppletInfo, GroupProfile, WeaveServices} from "@lightningrodlabs/we-applet";
 import {createDefaultWeServicesMock, wrapPathInSvg} from "@ddd-qc/we-utils";
 import {WAL} from "@lightningrodlabs/we-applet/dist/types";
 import {mdiClipboard, mdiFileOutline, mdiInformation} from "@mdi/js";
@@ -13,7 +13,7 @@ import {mdiClipboard, mdiFileOutline, mdiInformation} from "@mdi/js";
 
 
 /** */
-export async function createWhereWeServicesMock(devtestAppletId: string): Promise<WeServices> {
+export async function createWhereWeServicesMock(devtestAppletId: string): Promise<WeaveServices> {
 
     const fakeThreadsAppletHash = await fakeEntryHash();
     const fakeThreadsAppletId = encodeHashToBase64(fakeThreadsAppletHash);
@@ -21,7 +21,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
     const fakeFilesAppletHash = await fakeEntryHash();
     const fakeFilesAppletId = encodeHashToBase64(fakeFilesAppletHash);
 
-    const fakeGroupId = await fakeDnaHash();
+    const fakeGroupHash = await fakeDnaHash();
 
     //const myWeServicesMock = emptyWeServicesMock;
     const myWeServicesMock = await createDefaultWeServicesMock(devtestAppletId)
@@ -29,7 +29,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
     myWeServicesMock.groupProfile = async (groupId): Promise<GroupProfile> => {
         return {
             name: "fakeGroupeName",
-            logo_src: "https://media.istockphoto.com/id/1412901513/vector/modern-hand-technology-logo-design.jpg?s=612x612&w=0&k=20&c=zZ4Kh-J2BV_oLfx8Tfd65aUFdTNlCvjmWxLOT4sEeVs=",
+            icon_src: "https://media.istockphoto.com/id/1412901513/vector/modern-hand-technology-logo-design.jpg?s=612x612&w=0&k=20&c=zZ4Kh-J2BV_oLfx8Tfd65aUFdTNlCvjmWxLOT4sEeVs=",
         }
     }
 
@@ -42,7 +42,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
                 appletBundleId: await fakeEntryHash(),
                 appletName: "DevTestWeApplet",
                 appletIcon: "",
-                groupsIds: [fakeGroupId],
+                groupsHashes: [fakeGroupHash],
             }
         }
         if (fakeThreadsAppletId == appletId) {
@@ -50,7 +50,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
                 appletBundleId: await fakeEntryHash(),
                 appletName: "hThreadsWeApplet",
                 appletIcon: "",
-                groupsIds: [fakeGroupId],
+                groupsHashes: [fakeGroupHash],
             }
         }
         if (fakeFilesAppletId == appletId) {
@@ -58,7 +58,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
                 appletBundleId: await fakeEntryHash(),
                 appletName: "files-we_applet",
                 appletIcon: "",
-                groupsIds: [fakeGroupId],
+                groupsHashes: [fakeGroupHash],
             }
         }
         throw Error("appletInfo() failed. Unknown appletHash");

@@ -1,7 +1,7 @@
 import {DevTestNames, setup} from "@ddd-qc/we-utils";
 import {createWhereApplet} from "./createWhereApplet";
 import {createWhereWeServicesMock} from "./createWhereWeServicesMock";
-import {PlaysetEntryType, WHERE_DEFAULT_ROLE_NAME, WhereEntryType} from "@where/elements";
+import {PlaysetEntryType, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 import {AppletServices} from "@lightningrodlabs/we-applet";
 import {getAssetInfo} from "./appletServices/getAssetInfo";
 import {createLudoApplet} from "./createLudoApplet";
@@ -48,7 +48,7 @@ async function setupWhereMainView() {
     getAssetInfo,
     blockTypes: {},
     search,
-    bindAsset: async (a, b, c, d,e,f) => {},
+    bindAsset: async (a, b, c, d) => {},
   };
   return setup(appletServices, createWhereApplet, whereNames, createWhereWeServicesMock);
 }
@@ -64,7 +64,7 @@ async function setupLudoApplet() {
     getAssetInfo: ()  => {return undefined},
     blockTypes: {},
     search: async (appletClient, searchFilter) => {return []},
-    bindAsset: async (a, b, c, d,e,f) => {},
+    bindAsset: async (a, b, c, d) => {},
   };
   return setup(appletServices, createLudoApplet, whereNames, createWhereWeServicesMock);
 }

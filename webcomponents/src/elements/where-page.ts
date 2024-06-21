@@ -448,7 +448,8 @@ export class WherePage extends DnaElement<WhereDnaPerspective, WhereDvm> {
 
   /** */
   async onDumpLogs() {
-    this._dvm.dumpLogs();
+    this._dvm.dumpCallLogs();
+    this._dvm.dumpSignalLogs();
   }
 
   /** */

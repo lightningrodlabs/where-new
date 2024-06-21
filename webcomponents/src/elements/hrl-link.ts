@@ -16,7 +16,7 @@ import { EntryHash } from '@holochain/client';
 import { DnaHash } from '@holochain/client';
 import {AppletInfo, GroupProfile, weaveUrlFromWal} from '@lightningrodlabs/we-applet';
 import { Hrl } from '@lightningrodlabs/we-applet';
-import { WeClient } from '@lightningrodlabs/we-applet';
+import { WeaveClient } from '@lightningrodlabs/we-applet';
 import { sharedStyles } from '@holochain-open-dev/elements';
 import {weClientContext} from "../contexts";
 import {WeServicesEx} from "@ddd-qc/we-utils";
@@ -24,7 +24,7 @@ import {WeServicesEx} from "@ddd-qc/we-utils";
 
 /** */
 export async function getAppletsInfosAndGroupsProfiles(
-  weClient: WeClient,
+  weClient: WeaveClient,
   appletsHashes: EntryHash[],
 ): Promise<{
   appletsInfos: ReadonlyMap<EntryHash, AppletInfo>;
@@ -38,12 +38,12 @@ export async function getAppletsInfosAndGroupsProfiles(
     if (appletInfo) {
       appletsInfos.set(appletHash, appletInfo);
 
-      for (const groupId of appletInfo.groupsIds) {
-        if (!groupsProfiles.has(groupId)) {
-          const groupProfile = await weClient.groupProfile(groupId);
+      for (const groupHash of appletInfo.groupsHashes) {
+        if (!groupsProfiles.has(groupHash)) {
+          const groupProfile = await weClient.groupProfile(groupHash);
 
           if (groupProfile) {
-            groupsProfiles.set(groupId, groupProfile);
+            groupsProfiles.set(groupHash, groupProfile);
           }
         }
       }
@@ -93,7 +93,7 @@ export class HrlLink extends LitElement {
     }
 
     const { groupsProfiles, appletsInfos } = await getAppletsInfosAndGroupsProfiles(
-      this.weServices as any as WeClient,
+      this.weServices as any as WeaveClient,
       [attLocInfo.appletHash],
     );
 

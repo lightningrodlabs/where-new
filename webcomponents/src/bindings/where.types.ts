@@ -265,9 +265,7 @@ export type WhereEntry =
  * -------------------------------------------------------------------------------------------------
  * List of all link kinds handled by this Zome
  */
-export type WhereLinkType =
-  | {All: null} | {Hide: null};
-export enum WhereLinkTypeType {
+export enum WhereLinkType {
 	All = 'All',
 	Hide = 'Hide',
 }

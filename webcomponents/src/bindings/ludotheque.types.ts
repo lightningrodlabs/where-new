@@ -174,9 +174,7 @@ export type LudothequeEntry =
  * -------------------------------------------------------------------------------------------------
  * List of all link kinds handled by this Zome
  */
-export type LudothequeLinkType =
-  | {All: null};
-export enum LudothequeLinkTypeType {
+export enum LudothequeLinkType {
 	All = 'All',
 }
 
