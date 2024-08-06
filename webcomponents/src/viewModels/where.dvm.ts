@@ -16,7 +16,11 @@ import {
   Here,
   HereOutput,
   Message,
-  MessageType,
+  MessageType, MessageVariantDeleteHere,
+  MessageVariantNewEmojiGroup, MessageVariantNewHere, MessageVariantNewSession,
+  MessageVariantNewSpace,
+  MessageVariantNewSvgMarker,
+  MessageVariantNewTemplate, MessageVariantUpdateHere,
   PlacementSession,
   SignalPayload,
   WHERE_DEFAULT_ROLE_NAME
@@ -94,18 +98,21 @@ export class WhereDvm extends DnaViewModel {
       return;
     }
     const signalPayload = signal.payload as SignalPayload;
-    const sType = Object.keys(signalPayload.message.type)[0];
-    /* Update agent's presence stat */
-    this.updatePresence(signalPayload.from);
-    /* Send pong response */
-    if (sType != MessageType.Pong) {
-      console.log("PONGING ", signalPayload.from)
-      const pong: SignalPayload = {
-        maybeSpaceHash: signalPayload.maybeSpaceHash,
-        from: this._cellProxy.cell.address.agentId.b64,
-        message: {type: {Pong: null}, content: this._cellProxy.cell.address.agentId.b64}
-      };
-      this.notifyPeers(pong, [signalPayload.from])
+    const sType = Object.keys(signalPayload.message)[0];
+    console.log("Received Signal of type", sType);
+    if (!this.cell.address.agentId.equals(signalPayload.from)) {
+      /* Update agent's presence stat */
+      this.updatePresence(signalPayload.from);
+      /* Send pong response */
+      if (sType != MessageType.Pong) {
+        console.log("PONGING ", signalPayload.from)
+        const pong: SignalPayload = {
+          maybeSpaceHash: signalPayload.maybeSpaceHash,
+          from: this._cellProxy.cell.address.agentId.b64,
+          message: {Pong: this._cellProxy.cell.address.agentId.b64}
+        };
+        this.notifyPeers(pong, [signalPayload.from])
+      }
     }
     /* Handle signal */
     switch(sType) {
@@ -113,19 +120,19 @@ export class WhereDvm extends DnaViewModel {
       case MessageType.Pong:
         break;
       case MessageType.NewSvgMarker:
-        const svgEh = signalPayload.message.content as EntryHashB64;
+        const svgEh = (signalPayload.message as MessageVariantNewSvgMarker).NewSvgMarker;
         this.playsetZvm.fetchSvgMarker(svgEh);
         break;
       case MessageType.NewEmojiGroup:
-        const groupEh = signalPayload.message.content as EntryHashB64;
+        const groupEh = (signalPayload.message as MessageVariantNewEmojiGroup).NewEmojiGroup;
         this.playsetZvm.fetchEmojiGroup(groupEh);
         break;
       case MessageType.NewTemplate:
-        const templateEh = signalPayload.message.content as EntryHashB64;
+        const templateEh = (signalPayload.message as MessageVariantNewTemplate).NewTemplate;
         this.playsetZvm.fetchTemplate(templateEh);
         break;
       case MessageType.NewSpace:
-        const spaceEh = signalPayload.message.content as EntryHashB64;
+        const spaceEh = (signalPayload.message as MessageVariantNewSpace).NewSpace;
         /*await*/ this.playsetZvm.fetchSpace(spaceEh).then((space) => {
         if (space.meta.sessionCount == 0) {
           //this.whereZvm.createNextSession()
@@ -137,15 +144,14 @@ export class WhereDvm extends DnaViewModel {
         // }
         break;
       case MessageType.NewSession:
-        const sessEh = signalPayload.message.content[0];
-        const session: PlacementSession = signalPayload.message.content[1];
+        const [sessEh, session]  = (signalPayload.message as MessageVariantNewSession).NewSession;
         if (signalPayload.maybeSpaceHash && this._plays[signalPayload.maybeSpaceHash]) {
           this.whereZvm.addSession(signalPayload.maybeSpaceHash, sessEh, {name: session.name, index: session.index, locations: []});
           this._plays[signalPayload.maybeSpaceHash].sessions[session.name] = sessEh;
         }
         break;
       case MessageType.NewHere:
-        const hereInfo = signalPayload.message.content as HereOutput;
+        const hereInfo = (signalPayload.message as MessageVariantNewHere).NewHere;
         const newLocInfo: LocationInfo = materializeHere(hereInfo);
         if (signalPayload.maybeSpaceHash && this._plays[signalPayload.maybeSpaceHash]) {
           //console.log("locations before add", this._plays[signal.maybeSpaceHash].sessions[hereInfo.entry.sessionEh].locations.length)
@@ -154,8 +160,7 @@ export class WhereDvm extends DnaViewModel {
         }
         break;
       case MessageType.DeleteHere:
-        const sessionEh = signalPayload.message.content[0] as EntryHashB64;
-        const hereLinkAh = signalPayload.message.content[1] as ActionHashB64;
+        const [sessionEh, hereLinkAh] = (signalPayload.message as MessageVariantDeleteHere).DeleteHere;
         if (signalPayload.maybeSpaceHash && this._plays[signalPayload.maybeSpaceHash]) {
           //console.log("locations before remove", this._plays[signal.maybeSpaceHash].sessions[hereInfo.entry.sessionEh].locations.length)
           this.whereZvm.removeLocation(signalPayload.maybeSpaceHash, sessionEh, hereLinkAh);
@@ -164,10 +169,10 @@ export class WhereDvm extends DnaViewModel {
         }
         break;
       case MessageType.UpdateHere:
-        const idx = signalPayload.message.content[0] as number;
+        const [idx, linkAh, entry] = (signalPayload.message as MessageVariantUpdateHere).UpdateHere;
         const newHereInfo: HereInfo = {
-          entry: signalPayload.message.content[2] as Here,
-          linkAh: signalPayload.message.content[1] as ActionHashB64,
+          entry,
+          linkAh,
           author: signalPayload.from,
           };
         const newInfo = materializeHere(newHereInfo);
@@ -185,7 +190,7 @@ export class WhereDvm extends DnaViewModel {
     // if (signal.message.type != "Ping" && signal.message.type != "Pong") {
     //   console.log(`NOTIFYING ${signal.message.type}`, signal, peers)
     // };
-    console.log(`NOTIFYING "${signal.message.type}" to`, peers)
+    console.log(`NOTIFYING "${Object.keys(signal.message)[0]}" to`, peers)
     /* Skip if no recipients or sending to self only */
     if (!peers || peers.length == 1 && peers[0] === this._cellProxy.cell.address.agentId.b64) {
       console.log("notifyPeers() aborted: No recipients for notification")
@@ -200,7 +205,7 @@ export class WhereDvm extends DnaViewModel {
     const ping: SignalPayload = {
       maybeSpaceHash: maybeSpaceHash? maybeSpaceHash : undefined,
       from: this._cellProxy.cell.address.agentId.b64,
-      message: {type: {Ping: null}, content: this._cellProxy.cell.address.agentId.b64}};
+      message: {Ping: this._cellProxy.cell.address.agentId.b64}};
     // console.log({signal})
     this.notifyPeers(ping, peers);
   }
@@ -366,7 +371,7 @@ export class WhereDvm extends DnaViewModel {
     await this.notifyPeers({
         maybeSpaceHash: spaceEh,
         from: this._cellProxy.cell.address.agentId.b64,
-        message: {type: {NewSession: null}, content: [sessionEh, dematerializeSession(session, spaceEh)],
+        message: {NewSession: [sessionEh, dematerializeSession(session, spaceEh)],
         }},
       this.allCurrentOthers());
     /** Done */
@@ -518,7 +523,7 @@ export class WhereDvm extends DnaViewModel {
     //const oldLocInfo = this.whereZvm.getLocations(sessionEh)![locIdx]!
     const newLocInfo = await this.whereZvm.updateLocation(sessionEh, spaceEh, locIdx, c, tag, emoji, attachables);
     const entry = dematerializeHere(newLocInfo.location);
-    let message: Message = {type: {UpdateHere: null}, content: [locIdx, newLocInfo.linkAh, entry]};
+    let message: Message = {UpdateHere: [locIdx, newLocInfo.linkAh, entry]};
     let signal: SignalPayload = {maybeSpaceHash: spaceEh, from: this._cellProxy.cell.address.agentId.b64, message};
     await this.notifyPeers(signal, this.allCurrentOthers());
   }
@@ -536,7 +541,7 @@ export class WhereDvm extends DnaViewModel {
     await this.notifyPeers({
         maybeSpaceHash: spaceEh,
         from: this._cellProxy.cell.address.agentId.b64,
-        message: {type: {DeleteHere: null}, content: [locInfo.location.sessionEh, locInfo.linkAh],
+        message: {DeleteHere: [locInfo.location.sessionEh, locInfo.linkAh],
         }},
       this.allCurrentOthers());
   }
@@ -551,10 +556,7 @@ export class WhereDvm extends DnaViewModel {
     this.notifyPeers({
         maybeSpaceHash: spaceEh,
         from: this._cellProxy.cell.address.agentId.b64,
-        message: {
-          type: {NewHere: null},
-          content: {entry, linkAh, author: this._cellProxy.cell.address.agentId.b64}
-        }
+        message: {NewHere: {entry, linkAh, author: this._cellProxy.cell.address.agentId.b64}}
       }
       , this.allCurrentOthers());
   }

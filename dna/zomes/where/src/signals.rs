@@ -9,7 +9,7 @@ use crate::here::*;
 /// Messages sent by UI ONLY
 ///
 #[derive(Serialize, Deserialize, SerializedBytes, Debug)]
-#[serde(tag = "type", content = "content")]
+//#[serde(tag = "type", content = "content")]
 pub enum Message {
     Ping(AgentPubKeyB64),
     Pong(AgentPubKeyB64),

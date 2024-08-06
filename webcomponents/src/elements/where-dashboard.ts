@@ -276,7 +276,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     const newPlayInput = e.detail;
     const spaceEh = await this._dvm.constructNewPlay(newPlayInput.space, newPlayInput.sessionNames)
     /* - Notify others */
-    const newSpace: SignalPayload = {maybeSpaceHash: spaceEh, from: this._dvm.cell.address.agentId.b64, message: {type: {NewSpace: null}, content: spaceEh}};
+    const newSpace: SignalPayload = {maybeSpaceHash: spaceEh, from: this._dvm.cell.address.agentId.b64, message: {NewSpace: spaceEh}};
     this._dvm.notifyPeers(newSpace, this._dvm.allCurrentOthers());
     /* */
     await this.selectPlay(spaceEh);
@@ -322,7 +322,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     const template = e.detail as Template;
     const eh = await this._dvm.playsetZvm.publishTemplateEntry(template);
     this._dvm.notifyPeers(
-      {from: this._dvm.cell.address.agentId.b64, message: {type: {NewTemplate: null}, content: eh}},
+      {from: this._dvm.cell.address.agentId.b64, message: {NewTemplate: eh}},
       this._dvm.allCurrentOthers(),
     )
   }

@@ -210,18 +210,18 @@ export enum MessageType {
 	NewSvgMarker = 'NewSvgMarker',
 	NewEmojiGroup = 'NewEmojiGroup',
 }
+export type MessageVariantPing = {Ping: AgentPubKeyB64}
+export type MessageVariantPong = {Pong: AgentPubKeyB64}
+export type MessageVariantNewHere = {NewHere: HereOutput}
+export type MessageVariantDeleteHere = {DeleteHere: [EntryHashB64, ActionHashB64]}
+export type MessageVariantUpdateHere = {UpdateHere: [number, ActionHashB64, Here]}
+export type MessageVariantNewSession = {NewSession: [EntryHashB64, PlacementSession]}
+export type MessageVariantNewSpace = {NewSpace: EntryHashB64}
+export type MessageVariantNewTemplate = {NewTemplate: EntryHashB64}
+export type MessageVariantNewSvgMarker = {NewSvgMarker: EntryHashB64}
+export type MessageVariantNewEmojiGroup = {NewEmojiGroup: EntryHashB64}
 export type Message = 
- | {type: {Ping: null}, content: AgentPubKeyB64}
- | {type: {Pong: null}, content: AgentPubKeyB64}
- | {type: {NewHere: null}, content: HereOutput}
- | {type: {DeleteHere: null}, content: [EntryHashB64, ActionHashB64]}
- | {type: {UpdateHere: null}, content: [number, ActionHashB64, Here]}
- | {type: {NewSession: null}, content: [EntryHashB64, PlacementSession]}
- | {type: {NewSpace: null}, content: EntryHashB64}
- | {type: {NewTemplate: null}, content: EntryHashB64}
- | {type: {NewSvgMarker: null}, content: EntryHashB64}
- | {type: {NewEmojiGroup: null}, content: EntryHashB64}
-
+ | MessageVariantPing | MessageVariantPong | MessageVariantNewHere | MessageVariantDeleteHere | MessageVariantUpdateHere | MessageVariantNewSession | MessageVariantNewSpace | MessageVariantNewTemplate | MessageVariantNewSvgMarker | MessageVariantNewEmojiGroup;
 
 export interface SignalPayload {
   maybeSpaceHash?: EntryHashB64
