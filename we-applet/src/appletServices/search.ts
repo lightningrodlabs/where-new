@@ -4,8 +4,9 @@ import {
 } from "@holochain/client";
 import {AppletHash, WAL} from "@lightningrodlabs/we-applet/dist/types";
 import {WeaveServices} from "@lightningrodlabs/we-applet/dist/api";
-import {asCellProxy} from "@ddd-qc/we-utils";
+import {asCellProxy, intoHrl} from "@ddd-qc/we-utils";
 import {PlaysetProxy, SpaceOutput, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
+import {intoDhtId} from "@ddd-qc/cell-proxy";
 
 
 /**
@@ -24,7 +25,6 @@ export async function search(appletClient: AppClient, appletHash: AppletHash, we
         WHERE_DEFAULT_ROLE_NAME);
     console.log("Where/we-applet/search(): cellProxy", cellProxy);
     const playsetProxy/*: FilesProxy */ = new PlaysetProxy(cellProxy);
-    const dnaHash = decodeHashFromBase64(playsetProxy.cell.dnaHash);
 
     /** Search spaces */
     const spaces = await playsetProxy.getSpaces();
@@ -36,7 +36,7 @@ export async function search(appletClient: AppClient, appletHash: AppletHash, we
     /** Transform results into WAL */
     const results: Array<WAL> = matching
         .map((spaceOutput) => { return {
-            hrl: [dnaHash, decodeHashFromBase64(spaceOutput.hash)],
+            hrl: intoHrl(playsetProxy.cell.address.dnaId, intoDhtId(spaceOutput.hash)),
             context: {
                 subjectName: spaceOutput.content.name,
                 subjectType: "Space",

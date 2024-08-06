@@ -147,8 +147,8 @@ export class WhereSpace extends DnaElement<WhereDnaPerspective, WhereDvm>  {
   async firstUpdated() {
     this._dvm.whereZvm.subscribe(this, 'wherePerspective');
     // this._dvm.playsetZvm.subscribe(this, 'playsetPerspective');
-    await this._dvm.profilesZvm.probeProfile(this._dvm.cell.agentPubKey)
-    this._myProfile = this._dvm.profilesZvm.getProfile(this._dvm.cell.agentPubKey)!;
+    await this._dvm.profilesZvm.findProfile(this._dvm.cell.address.agentId)
+    this._myProfile = this._dvm.profilesZvm.getMyProfile()!;
     //await this.postInit();
     this._loaded = true;
     this._canPostInit = true;

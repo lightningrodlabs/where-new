@@ -8,7 +8,7 @@ import {sharedStyles} from "../sharedStyles";
 
 import {decodeHashFromBase64, EntryHash, EntryHashB64} from "@holochain/client";
 
-import {delay, DnaElement, HAPP_ENV, HappEnvType} from "@ddd-qc/lit-happ";
+import {delay, DnaElement, HAPP_ENV, HappEnvType, intoDhtId} from "@ddd-qc/lit-happ";
 import {Dictionary} from "@ddd-qc/cell-proxy";
 import {CellsForRole} from "@ddd-qc/cell-proxy/dist/types";
 
@@ -20,12 +20,12 @@ import {WhereArchiveDialog} from "../dialogs/where-archive-dialog";
 import { localized, msg } from '@lit/localize';
 import {WhereDnaPerspective, WhereDvm} from "../viewModels/where.dvm";
 import {Play, WherePerspective} from "../viewModels/where.perspective";
-import {PlaysetEntryType, Template} from "../bindings/playset.types";
+import {Template} from "../bindings/playset.types";
 
 //import {WhereCloneLudoDialog} from "../dialogs/where-clone-ludo-dialog";
 import {WhereLudoDialog} from "../dialogs/where-ludo-dialog";
 import {WherePlayInfoDialog} from "../dialogs/where-play-info-dialog";
-import {MessageType, SignalPayload} from "../bindings/where.types";
+import {SignalPayload} from "../bindings/where.types";
 
 import "@shoelace-style/shoelace/dist/components/avatar/avatar.js"
 import "@shoelace-style/shoelace/dist/components/badge/badge.js"
@@ -59,7 +59,7 @@ import {AppletInfo} from "@lightningrodlabs/we-applet/dist/types";
 import {Profile as  ProfileMat} from "@ddd-qc/profiles-dvm";
 import {weClientContext} from "../contexts";
 import {getAppletsInfosAndGroupsProfiles} from "./hrl-link";
-import {WeServicesEx} from "@ddd-qc/we-utils";
+import {intoHrl, WeServicesEx} from "@ddd-qc/we-utils";
 import {str2obj} from "../utils";
 
 
@@ -160,7 +160,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     fields['color'] = color;
     fields['avatar'] = avatar;
     try {
-      if (this._dvm.profilesZvm.getProfile(this._dvm.profilesZvm.cell.agentPubKey)) {
+      if (this._dvm.profilesZvm.getMyProfile()) {
         await this._dvm.profilesZvm.updateMyProfile({nickname, fields});
       } else {
         await this._dvm.profilesZvm.createMyProfile({nickname, fields});
@@ -276,7 +276,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     const newPlayInput = e.detail;
     const spaceEh = await this._dvm.constructNewPlay(newPlayInput.space, newPlayInput.sessionNames)
     /* - Notify others */
-    const newSpace: SignalPayload = {maybeSpaceHash: spaceEh, from: this._dvm.cell.agentPubKey, message: {type: {NewSpace: null}, content: spaceEh}};
+    const newSpace: SignalPayload = {maybeSpaceHash: spaceEh, from: this._dvm.cell.address.agentId.b64, message: {type: {NewSpace: null}, content: spaceEh}};
     this._dvm.notifyPeers(newSpace, this._dvm.allCurrentOthers());
     /* */
     await this.selectPlay(spaceEh);
@@ -322,7 +322,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     const template = e.detail as Template;
     const eh = await this._dvm.playsetZvm.publishTemplateEntry(template);
     this._dvm.notifyPeers(
-      {from: this._dvm.cell.agentPubKey, message: {type: {NewTemplate: null}, content: eh}},
+      {from: this._dvm.cell.address.agentId.b64, message: {type: {NewTemplate: null}, content: eh}},
       this._dvm.allCurrentOthers(),
     )
   }
@@ -411,7 +411,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
 
      /* -- Grab things from the perspective -- */
 
-    this._myProfile = this._dvm.profilesZvm.getProfile(this._dvm.cell.agentPubKey);
+    this._myProfile = this._dvm.profilesZvm.getMyProfile();
 
 
     /* -- Build elements -- */
@@ -492,7 +492,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
             <mwc-icon class="copy-icon"
                       style="cursor:pointer;"
                       @click=${ async () => {
-                        const spaceHrl: Hrl = [decodeHashFromBase64(this.cell.dnaHash), decodeHashFromBase64(spaceEh)];
+                        const spaceHrl: Hrl = intoHrl(this.cell.address.dnaId, intoDhtId(spaceEh));
                         this.weServices.walToPocket({hrl: spaceHrl, context: null});
                       }}
             >content_copy</mwc-icon>` :html``}

@@ -7,8 +7,8 @@ import {MARKER_WIDTH} from "../sharedRender";
 import {g_stringStore} from "../stringStore";
 import {DnaElement} from "@ddd-qc/lit-happ";
 import {WhereDnaPerspective, WhereDvm} from "../viewModels/where.dvm";
-import {AgentPubKeyB64, decodeHashFromBase64} from "@holochain/client";
-import {Dictionary} from "@ddd-qc/cell-proxy";
+import {AgentPubKeyB64, decodeHashFromBase64, Timestamp} from "@holochain/client";
+import {ActionIdMap, Dictionary} from "@ddd-qc/cell-proxy";
 
 import "@shoelace-style/shoelace/dist/components/avatar/avatar.js"
 import "@shoelace-style/shoelace/dist/components/badge/badge.js"
@@ -38,7 +38,8 @@ import "@material/mwc-button";
 import "@material/mwc-fab";
 import "@material/mwc-icon-button-toggle";
 import "@material/mwc-textfield";
-import {Profile as  ProfileMat, ProfilesPerspective} from "@ddd-qc/profiles-dvm";
+import {Profile as ProfileMat, ProfilesAltPerspective} from "@ddd-qc/profiles-dvm";
+import {Profile} from "@ddd-qc/profiles-dvm/dist/bindings/profiles.types";
 
 
 
@@ -56,7 +57,7 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
   @property() canShowTable: boolean = true;
 
   @property({type: Object, attribute: false, hasChanged: (_v, _old) => true})
-  profilesPerspective!: ProfilesPerspective;
+  profilesPerspective!: ProfilesAltPerspective;
 
   @state() private _loaded = false;
 
@@ -74,7 +75,7 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
   /** */
   determineAgentStatus(key: AgentPubKeyB64) {
     // const status = "primary"; // "neutral"
-    if (key == this._dvm.cell.agentPubKey) {
+    if (key == this._dvm.cell.address.agentId.b64) {
       return "success";
     }
     const lastPingTime: number = this.perspective.agentPresences[key];
@@ -128,20 +129,20 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
 
 
   /** */
-  renderList(profiles:  Dictionary<ProfileMat>) {
+  renderList(profiles: ActionIdMap<[Profile, Timestamp]>) {
 
     if (Object.keys(profiles).length === 0) {
       return html`
-        <mwc-list-item
-        >(no profiles found)
-        </mwc-list-item
-        >`;
+        <mwc-list-item>
+          (no profiles found)
+        </mwc-list-item>
+      `;
     }
 
     const filterField = this.shadowRoot!.getElementById("filter-field") as TextField;
     const filterStr = filterField && filterField.value? filterField.value : "";
 
-    const visibleProfiles = Object.entries(profiles).filter(([key, profile]) => {
+    const visibleProfiles = Array.from(profiles.entries()).filter(([_key, [profile, _ts]]) => {
       return filterStr.length < 2 || profile.nickname.toLowerCase().includes(filterStr.toLowerCase())
     });
 
@@ -163,24 +164,23 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
     // })
 
     /** Build avatar agent list */
-    const peers = visibleProfiles.map(([keyB64, profile]) => {
-      let key = decodeHashFromBase64(keyB64)
+    const peers = visibleProfiles.map(([agentId, [profile, _ts]]) => {
       let opacity = 1.0;
-      if (this.soloAgent && this.soloAgent != keyB64) {
+      if (this.soloAgent && this.soloAgent != agentId.b64) {
         opacity = 0.4;
       }
       return html`
         <li class="folk" style="opacity: ${opacity};">
           <span @click="${this.handleClickAvatar}">
-            <sl-avatar id=${key}  .image=${profile.fields.avatar}
+            <sl-avatar id=${agentId.b64}  .image=${profile.fields.avatar}
                        style="background-color:${profile.fields.color};border: ${profile.fields.color} 1px solid;">
             </sl-avatar>
-            <sl-badge class="avatar-badge" type="${this.determineAgentStatus(keyB64)}" pill></sl-badge>
+            <sl-badge class="avatar-badge" type=${this.determineAgentStatus(agentId.b64)} pill></sl-badge>
             <span style="color:${profile.fields['color']};margin-left:4px;font-size:16px;font-weight:bold;-webkit-text-stroke:0.1px black;">
               ${profile.nickname}
             </span>
           </span>
-          ${keyB64 == this._dvm.cell.agentPubKey? html`
+          ${agentId.equals(this._dvm.cell.address.agentId)? html`
             <sl-tooltip content=${msg('Remove all my locations')} placement="bottom" hoist>
               <mwc-icon-button icon="wrong_location" style="margin-top: -5px;" @click=${() => this.handleClickDeleteMyLocations()}></mwc-icon-button>
             </sl-tooltip>
@@ -189,13 +189,12 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
     })
 
     /** Build names agent list */
-    const peer_list = visibleProfiles.map(([keyB64, profile]) => {
-      let key = decodeHashFromBase64(keyB64)
+    const peer_list = visibleProfiles.map(([key, [profile, _ts]]) => {
       let opacity = 1.0;
-      if (this.soloAgent && this.soloAgent != keyB64) {
+      if (this.soloAgent && !key.equals(this.soloAgent)) {
         opacity = 0.4;
       }
-      const status = this.determineAgentStatus(keyB64);
+      const status = this.determineAgentStatus(key.b64);
       const statusColor = this.status2color(status)
 
       // y.js style ; need code to generate darken value
@@ -203,9 +202,9 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
       // <div style="color:${statusColor};margin-left:8px;margin-top:-21px;">${profile.nickname}</div>
 
       return html`
-        <li class="folk-row" style="opacity: ${opacity};" @click="${this.handleClickAvatar}" id=${key}>
+        <li class="folk-row" style="opacity: ${opacity};" @click="${this.handleClickAvatar}" id=${key.b64}>
           <div
-            style="background-color:${profile.fields['color']};width:9px;height:9px;display:inline-flex;border-radius:12px;border:1px solid gray;"></div>
+            style="background-color:${profile.fields['color']};width:9px;height:9px;display:inline-flex;border-radius:12px;border:1px solid grey;"></div>
           <span style="color:${statusColor};margin-left:2px">${profile.nickname}</span>
         </li>`
     })
@@ -217,7 +216,7 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
       <!-- <mwc-icon-button-toggle mini id="toggle-view-fab" onIcon="visibility" offIcon="visibility_off" style="" @click=${() => this.toggleView()}></mwc-toggle> -->
       <!-- <mwc-textfield id="filter-field" outlined icon="search" class="rounded" style="width: 180px" @input=${() =>this.requestUpdate()}></mwc-textfield> -->
       <sl-input id="filter-field" placeholder=${g_stringStore.get("filter")} clearable size="small" pill @input=${() =>this.requestUpdate()} @sl-clear=${() =>this.requestUpdate()}>
-        <mwc-icon style="color:gray;" slot="prefix">search</mwc-icon>
+        <mwc-icon style="color:grey;" slot="prefix">search</mwc-icon>
       </sl-input>
       <!-- <mwc-switch id="folks-switch" @click=${() => this.toggleView()}></mwc-switch> -->
       <div class="folks">
@@ -234,7 +233,7 @@ export class WherePeerList extends DnaElement<WhereDnaPerspective, WhereDvm> {
         <mwc-circular-progress indeterminate></mwc-circular-progress>
       </div>`;
     }
-    console.log("<where-peer-list> render()", Object.keys(this.profilesPerspective.profiles).length);
+    console.log("<where-peer-list>.render()", this.profilesPerspective.profiles);
 
     return this.renderList(this.profilesPerspective.profiles);
   }

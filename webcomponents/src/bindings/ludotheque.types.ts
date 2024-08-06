@@ -3,14 +3,14 @@
 import {
 WebsocketConnectionOptions,
 /** types.ts */
-HoloHash,
-AgentPubKey,
-DnaHash,
-WasmHash,
-EntryHash,
-ActionHash,
-AnyDhtHash,
-ExternalHash,
+//HoloHash,
+//AgentPubKey,
+//DnaHash,
+//WasmHash,
+//EntryHash,
+//ActionHash,
+//AnyDhtHash,
+//ExternalHash,
 KitsuneAgent,
 KitsuneSpace,
 HoloHashB64,
@@ -123,6 +123,17 @@ NetworkSeed,
 ZomeLocation,
    } from '@holochain/client';
 
+
+/// Simple Hashes
+type AgentArray = Uint8Array;
+type DnaArray = Uint8Array;
+type WasmArray = Uint8Array;
+type EntryArray = Uint8Array;
+type ActionArray = Uint8Array;
+type AnyDhtArray = Uint8Array;
+type AnyLinkableArray = Uint8Array;
+type ExternalArray = Uint8Array;
+
 import {
 /** Common */
 DhtOpHashB64,
@@ -167,16 +178,6 @@ export enum LudothequeEntryType {
 export type LudothequeEntryVariantPlayset = {Playset: Playset}
 export type LudothequeEntry = 
  | LudothequeEntryVariantPlayset;
-
-/**
- * -------------------------------------------------------------------------------------------------
- * Declaration of this zome's link types
- * -------------------------------------------------------------------------------------------------
- * List of all link kinds handled by this Zome
- */
-export enum LudothequeLinkType {
-	All = 'All',
-}
 
 /** Playset Entry */
 export interface Playset {

@@ -891,7 +891,7 @@ export class LudothequePage extends DnaElement<unknown, LudothequeDvm> {
     <where-svg-marker-dialog id="svg-marker-dialog" @svg-marker-added=${(e:any) => console.log(e.detail)}></where-svg-marker-dialog>
     <where-space-dialog id="space-dialog" @space-created=${this.handleSpaceDialogClosing}></where-space-dialog>
     <mwc-dialog id="show-code-dialog" heading="${msg('Library UUID')}" @opened=${this.requestUpdate()}>
-      <mwc-textfield outlined helperPersistent helper="${this.cell.dnaHash}" .value="${this.cell.dnaModifiers.network_seed}" style="min-width: 500px;" type="text" id="show-uuid-field" label="UUID"></mwc-textfield>
+      <mwc-textfield outlined helperPersistent helper="${this.cell.address.dnaId.b64}" .value="${this.cell.dnaModifiers.network_seed}" style="min-width: 500px;" type="text" id="show-uuid-field" label="UUID"></mwc-textfield>
       <mwc-button id="primary-action-button" raised slot="primaryAction" @click=${this.handleShareOk}>${msg('ok')}</mwc-button>
     </mwc-dialog>
   </div>

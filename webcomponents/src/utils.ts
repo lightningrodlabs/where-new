@@ -1,5 +1,5 @@
 /** */
-import {CellId, HoloHashB64} from "@holochain/client";
+import {HoloHashB64} from "@holochain/client";
 
 export interface HoloHashedB64<T> {
   hash: HoloHashB64;

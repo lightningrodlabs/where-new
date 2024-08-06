@@ -3,7 +3,7 @@
   "version"        : "0.3.1",
   "config"         : {
     "hc_version"   : "0.3.1",
-    "zits_version" : "1.14.0",
+    "zits_version" : "1.16.2",
     "bin"          : "bin"
   },
   "private"        : true,
@@ -110,12 +110,12 @@
     "typescript"              : "~5.2.0"
   },
   "dependencies"   : {
-    "@holochain/client": "^0.18.0-dev.1",
-    "@lightningrodlabs/we-applet": "0.17.0-dev.3",
-    "@ddd-qc/cell-proxy": "=0.24.6",
-    "@ddd-qc/lit-happ"  : "=0.24.8",
-    "@ddd-qc/we-utils": "=0.24.2",
-    "@ddd-qc/profiles-dvm": "=0.24.1",
+    "@holochain/client": "=0.18.0-dev.4",
+    "@lightningrodlabs/we-applet": "0.17.1",
+    "@ddd-qc/cell-proxy": "=0.27.6",
+    "@ddd-qc/lit-happ"  : "=0.27.6",
+    "@ddd-qc/we-utils": "=0.27.6",
+    "@ddd-qc/profiles-dvm": "=0.27.6",
     "@holochain-open-dev/core-types": "=0.7.0",
     "@holochain-open-dev/profiles": "=0.17.3",
     "@shoelace-style/shoelace": "2.11.2",

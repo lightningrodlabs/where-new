@@ -84,7 +84,7 @@ export class LudothequeStandaloneApp extends HappElement {
     this.appProxy.addSignalHandler((sig) => this.onSignal(sig), this.ludothequeDvm.hcl.toString());
     /** Send dnaHash to electron */
     if (HAPP_ENV == HappEnvType.Electron) {
-      const ludoDnaHashB64 = this.ludothequeDvm.cell.dnaHash;
+      const ludoDnaHashB64 = this.ludothequeDvm.cell.address.dnaId.b64;
       //const ipc = window.require('electron').ipcRenderer;
       const ipc = window.require('electron').ipcRenderer;
       let _reply = ipc.sendSync('dnaHash', ludoDnaHashB64);

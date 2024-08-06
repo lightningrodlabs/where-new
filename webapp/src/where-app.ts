@@ -16,7 +16,7 @@ import {
   BaseRoleName,
   CellsForRole, CloneId,
   delay,
-  Dictionary, DnaViewModel, DvmDef,
+  Dictionary, DnaViewModel, DvmDef, EntryId,
   HAPP_ELECTRON_API,
   HAPP_ENV,
   HappElement,
@@ -113,7 +113,7 @@ export class WhereApp extends HappElement {
       private _adminWs?: AdminWebsocket,
       appId?: InstalledAppId,
       weServices?: WeaveServices,
-      thisAppletId?: AppletId,
+      thisAppletId?: EntryId,
       public appletView?: AppletView,
       profileInfo?: ProfileInfo,
   ) {
@@ -199,13 +199,27 @@ export class WhereApp extends HappElement {
     this.requestUpdate();
   }
 
+  async attemptEntryDefs(attempts: number, delayMs: number): Promise<boolean> {
+    while(attempts > 0) {
+      attempts -= 1;
+      const allAppEntryTypes = await this.whereDvm.fetchAllEntryDefs();
+      if (Object.values(allAppEntryTypes[WHERE_DEFAULT_COORDINATOR_ZOME_NAME]).length == 0) {
+        console.warn(`No entries found for ${WHERE_DEFAULT_COORDINATOR_ZOME_NAME}`);
+        await delay(delayMs);
+      } else {
+        // console.log("allAppEntryTypes", allAppEntryTypes)
+        return true;
+      }
+    }
+    return false;
+  }
 
   /** */
   async hvmConstructed() {
     console.log("<where-app>.hvmConstructed()", this._adminWs)
     /** Send dnaHash to electron */
     if (HAPP_ENV == HappEnvType.Electron) {
-      const whereDnaHashB64 = this.hvm.getDvm(WhereDvm.DEFAULT_BASE_ROLE_NAME)!.cell.dnaHash;
+      const whereDnaHashB64 = this.hvm.getDvm(WhereDvm.DEFAULT_BASE_ROLE_NAME)!.cell.address.dnaId;
       //let _reply = HAPP_ELECTRON_API.dnaHashSync(whereDnaHashB64);
       //const ipc = window.require('electron').ipcRenderer;
       //const ipc = window.require('electron').ipcRenderer;
@@ -213,14 +227,7 @@ export class WhereApp extends HappElement {
     }
 
     /** Probe EntryDefs */
-    const allAppEntryTypes = await this.whereDvm.fetchAllEntryDefs();
-    console.log("happInitialized(), allAppEntryTypes", allAppEntryTypes);
-    console.log(`${WHERE_DEFAULT_COORDINATOR_ZOME_NAME} entries`, allAppEntryTypes[WHERE_DEFAULT_COORDINATOR_ZOME_NAME]);
-    if (allAppEntryTypes[WHERE_DEFAULT_COORDINATOR_ZOME_NAME].length == 0) {
-      console.warn(`No entries found for ${WHERE_DEFAULT_COORDINATOR_ZOME_NAME}`);
-    } else {
-      this._hasHolochainFailed = false;
-    }
+    this._hasHolochainFailed = !(await this.attemptEntryDefs(5, 1000));
 
     // /** Probe we-applets */
     // if (this._weServices) {
@@ -256,7 +263,7 @@ export class WhereApp extends HappElement {
   async perspectiveInitializedOnline(): Promise<void> {
     console.log("<where-app>.perspectiveInitializedOnline()");
     /** Load My profile */
-    const maybeMyProfile = this.whereDvm.profilesZvm.perspective.profiles[this.whereDvm.cell.agentPubKey]
+    const maybeMyProfile = this.whereDvm.profilesZvm.getMyProfile();
     console.log("<where-app>.perspectiveInitializedOnline() maybeMyProfile", maybeMyProfile);
     if (maybeMyProfile) {
       const maybeLang = maybeMyProfile.fields['lang'];
@@ -381,11 +388,11 @@ export class WhereApp extends HappElement {
     return html`
         <cell-context .cell="${this.ludothequeDvm.cell}">
                   <ludotheque-page examples
-                                   .whereInventory="${this._whereInventory}"
-                                   .whereCellId=${this.whereDvm.cell.id}
-                                   @space-exported="${this.handleSpaceExported}"
-                                   @import-playset-requested="${this.handleImportRequest}"
-                                   @exit="${() => this._canLudotheque = false}"
+                                   .whereInventory=${this._whereInventory}
+                                   .whereCellId=${this.whereDvm.cell.address.intoId()}
+                                   @space-exported=${this.handleSpaceExported}
+                                   @import-playset-requested=${this.handleImportRequest}
+                                   @exit=${() => this._canLudotheque = false}
                   ></ludotheque-page>
         </cell-context>
     `;
@@ -535,7 +542,7 @@ export class WhereApp extends HappElement {
 
     const startTime = Date.now();
     this.importingDialogElem.open = true;
-    const spaceEhs = await this.ludothequeDvm.ludothequeZvm.exportPlayset(this._currentPlaysetEh, this.whereDvm.cell.id)
+    const spaceEhs = await this.ludothequeDvm.ludothequeZvm.exportPlayset(this._currentPlaysetEh, this.whereDvm.cell.address.intoId())
     console.log("handleImportRequest()", spaceEhs.length)
     await this.whereDvm.playsetZvm.ProbePlaysets();
 

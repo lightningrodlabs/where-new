@@ -4,14 +4,14 @@ import {MarkerPiece, PlaysetEntry, EmojiGroup, EmojiGroupOutput, ExportPieceInpu
 import {
 WebsocketConnectionOptions,
 /** types.ts */
-HoloHash,
-AgentPubKey,
-DnaHash,
-WasmHash,
-EntryHash,
-ActionHash,
-AnyDhtHash,
-ExternalHash,
+//HoloHash,
+//AgentPubKey,
+//DnaHash,
+//WasmHash,
+//EntryHash,
+//ActionHash,
+//AnyDhtHash,
+//ExternalHash,
 KitsuneAgent,
 KitsuneSpace,
 HoloHashB64,
@@ -124,6 +124,17 @@ NetworkSeed,
 ZomeLocation,
    } from '@holochain/client';
 
+
+/// Simple Hashes
+type AgentArray = Uint8Array;
+type DnaArray = Uint8Array;
+type WasmArray = Uint8Array;
+type EntryArray = Uint8Array;
+type ActionArray = Uint8Array;
+type AnyDhtArray = Uint8Array;
+type AnyLinkableArray = Uint8Array;
+type ExternalArray = Uint8Array;
+
 import {
 /** Common */
 DhtOpHashB64,
@@ -148,13 +159,16 @@ ValidationReceipt,
 
 import {ZomeProxy} from '@ddd-qc/lit-happ';
 import {playsetFunctionNames} from './playset.fn';
+import {PlaysetUnitEnum, PlaysetLinkType} from './playset.integrity';
 
 /**
  *
  */
 export class PlaysetProxy extends ZomeProxy {
-  static readonly DEFAULT_ZOME_NAME = "zPlayset"
-  static readonly FN_NAMES = playsetFunctionNames
+  static readonly DEFAULT_ZOME_NAME = "zPlayset";
+  static readonly FN_NAMES = playsetFunctionNames;
+  static readonly ENTRY_TYPES = Object.values(PlaysetUnitEnum);
+  static readonly LINK_TYPES = Object.values(PlaysetLinkType);
  
   async exportPiece(input: ExportPieceInput): Promise<void> {
     return this.call('export_piece', input);
