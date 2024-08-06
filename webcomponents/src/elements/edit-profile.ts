@@ -13,7 +13,6 @@ import "@shoelace-style/shoelace/dist/components/color-picker/color-picker.js"
 import "@shoelace-style/shoelace/dist/components/radio/radio.js"
 import "@shoelace-style/shoelace/dist/components/radio-group/radio-group.js"
 import {Profile as ProfileMat} from "@ddd-qc/profiles-dvm";
-import {Dialog} from "@material/mwc-dialog";
 
 
 /** Crop the image and return a base64 bytes string of its content */

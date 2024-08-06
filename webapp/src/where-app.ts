@@ -284,6 +284,7 @@ export class WhereApp extends HappElement {
   async createMyProfile(profile: ProfileMat) {
     //console.log("onNewProfile()", profile)
     await this.whereDvm.profilesZvm.createMyProfile(profile);
+    await delay(100); // wait for profile to arrive via signal
     this._hasStartingProfile = true;
   }
 

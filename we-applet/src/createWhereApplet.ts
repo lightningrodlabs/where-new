@@ -12,7 +12,7 @@ import {
 
 import {ProfileInfo, WhereApp} from "@where/app";
 import {AppletViewInfo, ProfilesApi} from "@ddd-qc/we-utils";
-import {destructureCloneId, ExternalAppProxy, HCL} from "@ddd-qc/cell-proxy";
+import {destructureCloneId, EntryId, ExternalAppProxy, HCL} from "@ddd-qc/cell-proxy";
 
 
 /** */
@@ -70,7 +70,7 @@ export async function createWhereApplet(
       undefined,
       mainAppInfo.installed_app_id,
       weServices,
-      encodeHashToBase64(appletViewInfo.appletHash),
+      new EntryId(appletViewInfo.appletHash),
       appletViewInfo.view, //encodeHashToBase64(appletViewInfo.appletHash),
       profileInfo,
       );

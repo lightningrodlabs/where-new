@@ -9,7 +9,7 @@ import {sharedStyles} from "../sharedStyles";
 import {decodeHashFromBase64, EntryHash, EntryHashB64} from "@holochain/client";
 
 import {delay, DnaElement, HAPP_ENV, HappEnvType, intoDhtId} from "@ddd-qc/lit-happ";
-import {Dictionary} from "@ddd-qc/cell-proxy";
+import {Dictionary, EntryIdMap} from "@ddd-qc/cell-proxy";
 import {CellsForRole} from "@ddd-qc/cell-proxy/dist/types";
 
 import {renderSurface} from "../sharedRender";
@@ -172,7 +172,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
   }
 
 
-  private _appletsInfos: ReadonlyMap<EntryHash, AppletInfo>;
+  private _appletsInfos: EntryIdMap<AppletInfo>;
 
   /** After first render only */
   async firstUpdated() {

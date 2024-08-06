@@ -11,7 +11,6 @@ import '@shoelace-style/shoelace/dist/components/tag/tag.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
 
-import { HoloHashMap } from '@holochain-open-dev/utils';
 import { EntryHash } from '@holochain/client';
 import { DnaHash } from '@holochain/client';
 import {AppletInfo, GroupProfile, weaveUrlFromWal} from '@lightningrodlabs/we-applet';
@@ -20,6 +19,8 @@ import { WeaveClient } from '@lightningrodlabs/we-applet';
 import { sharedStyles } from '@holochain-open-dev/elements';
 import {weClientContext} from "../contexts";
 import {WeServicesEx} from "@ddd-qc/we-utils";
+import {AssetLocationAndInfo} from "@lightningrodlabs/we-applet/dist/types";
+import {DnaId, DnaIdMap, EntryId, EntryIdMap} from "@ddd-qc/cell-proxy";
 
 
 /** */
@@ -27,23 +28,23 @@ export async function getAppletsInfosAndGroupsProfiles(
   weClient: WeaveClient,
   appletsHashes: EntryHash[],
 ): Promise<{
-  appletsInfos: ReadonlyMap<EntryHash, AppletInfo>;
-  groupsProfiles: ReadonlyMap<DnaHash, GroupProfile>;
+  appletsInfos: EntryIdMap<AppletInfo>;
+  groupsProfiles: DnaIdMap<GroupProfile>;
 }> {
-  const groupsProfiles = new HoloHashMap<DnaHash, GroupProfile>();
-  const appletsInfos = new HoloHashMap<EntryHash, AppletInfo>();
+  const groupsProfiles = new DnaIdMap<GroupProfile>();
+  const appletsInfos = new EntryIdMap<AppletInfo>();
 
   for (const appletHash of appletsHashes) {
     const appletInfo = await weClient.appletInfo(appletHash);
     if (appletInfo) {
-      appletsInfos.set(appletHash, appletInfo);
+      appletsInfos.set(new EntryId(appletHash), appletInfo);
 
       for (const groupHash of appletInfo.groupsHashes) {
-        if (!groupsProfiles.has(groupHash)) {
+        const groupId = new DnaId(groupHash);
+        if (!groupsProfiles.get(groupId)) {
           const groupProfile = await weClient.groupProfile(groupHash);
-
           if (groupProfile) {
-            groupsProfiles.set(groupHash, groupProfile);
+            groupsProfiles.set(groupId, groupProfile);
           }
         }
       }
@@ -76,34 +77,34 @@ export class HrlLink extends LitElement {
   @property()
   onlyIcon = false;
 
-  @state() private _info?;//: {attachableInfo: AttachableLocationAndInfo, groupsProfiles: ReadonlyMap<EntryHash, AppletInfo>, appletsInfos: ReadonlyMap<DnaHash, GroupProfile>};
+  @state() private _info?: {attachableInfo: AssetLocationAndInfo,   appletsInfos: EntryIdMap<AppletInfo>; groupsProfiles: DnaIdMap<GroupProfile>};
 
 
   /** */
   protected async firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
     console.log("<we-hrl> firstUpdated()", this.hrl, this.context);
-    const attLocInfo = await this.weServices.assetInfo({
+    const attachableInfo = await this.weServices.assetInfo({
       hrl: this.hrl,
       context: this.context,
     });
-    if (!attLocInfo) {
+    if (!attachableInfo) {
       this._info = null;
       return;
     }
 
     const { groupsProfiles, appletsInfos } = await getAppletsInfosAndGroupsProfiles(
       this.weServices as any as WeaveClient,
-      [attLocInfo.appletHash],
+      [attachableInfo.appletHash],
     );
 
-    this._info = {attLocInfo, groupsProfiles, appletsInfos};
+    this._info = {attachableInfo, groupsProfiles, appletsInfos};
   }
 
 
   /** */
   render() {
-    console.log("<we-hrl>.render(): ", this.hrl, this.context, this._info);
+    console.log("<we-hrl>.render()", this.hrl, this.context, this._info);
     if(this._info == undefined) {
       return html`<sl-skeleton></sl-skeleton>`;
     }
@@ -114,24 +115,27 @@ export class HrlLink extends LitElement {
     //   return html`No entry found`; // TODO: what to put here?
     // }
 
-  const { attLocInfo, groupsProfiles, appletsInfos } = this._info;
-  console.log("<we-hrl>", attLocInfo.assetInfo.name, weaveUrlFromWal({hrl:this.hrl}))
+  const { attachableInfo, groupsProfiles, appletsInfos } = this._info;
+  console.log("<we-hrl> assetInfo", attachableInfo.assetInfo.name, weaveUrlFromWal({hrl:this.hrl}))
 
+  const appletId = new EntryId(attachableInfo.appletHash);
+
+  /** */
   return html`
     <sl-tooltip style="--max-width: 30rem;">
       <div slot="content">
         <div class="row" style="align-items: center">
           ${this.onlyIcon
-            ? html` <span>${attLocInfo.assetInfo.name},&nbsp;</span> `
+            ? html` <span>${attachableInfo.assetInfo.name},&nbsp;</span> `
             : html``}
-          <span style="margin-right:6px;">From ${appletsInfos.get(attLocInfo.appletHash)?.appletName}</span>
-          ${appletsInfos.get(attLocInfo.appletHash)?.groupsIds.map(
-            (groupId) => html`
+          <span style="margin-right:6px;">From ${appletsInfos.get(appletId)?.appletName}</span>
+          ${appletsInfos.get(appletId)?.groupsHashes.map(
+            (groupHash) => html`
               <img
-                .src=${groupsProfiles.get(groupId)?.logo_src}
+                .src=${groupsProfiles.get(new DnaId(groupHash))?.icon_src}
                 style="height: 16px; width: 16px; margin-right: 4px; border-radius: 50%"
               />
-              <span>${groupsProfiles.get(groupId)?.name}</span>
+              <span>${groupsProfiles.get(new DnaId(groupHash))?.name}</span>
             `,
           )}
         </div>
@@ -148,11 +152,11 @@ export class HrlLink extends LitElement {
         }}
       >
         <div class="row" style="align-items: center">
-          <sl-icon .src=${attLocInfo.assetInfo.icon_src}></sl-icon>
+          <sl-icon .src=${attachableInfo.assetInfo.icon_src}></sl-icon>
           ${this.onlyIcon
             ? html``
             : html`
-                <span style="margin-left:8px; text-overflow:ellipsis;">${attLocInfo.assetInfo.name}</span>
+                <span style="margin-left:8px; text-overflow:ellipsis;">${attachableInfo.assetInfo.name}</span>
               `}
         </div>
       </sl-tag>

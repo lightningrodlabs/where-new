@@ -5,15 +5,15 @@ import {
 } from "@holochain/client";
 import {AppletInfo, GroupProfile, WeaveServices} from "@lightningrodlabs/we-applet";
 import {createDefaultWeServicesMock, wrapPathInSvg} from "@ddd-qc/we-utils";
-import {WAL} from "@lightningrodlabs/we-applet/dist/types";
 import {mdiClipboard, mdiFileOutline, mdiInformation} from "@mdi/js";
+import {EntryId} from "@ddd-qc/cell-proxy";
 
 
 
 
 
 /** */
-export async function createWhereWeServicesMock(devtestAppletId: string): Promise<WeaveServices> {
+export async function createWhereWeServicesMock(devtestAppletId: EntryId): Promise<WeaveServices> {
 
     const fakeThreadsAppletHash = await fakeEntryHash();
     const fakeThreadsAppletId = encodeHashToBase64(fakeThreadsAppletHash);
@@ -37,7 +37,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
     myWeServicesMock.appletInfo = async (appletHash: EntryHash): Promise<AppletInfo | undefined> => {
         const appletId = encodeHashToBase64(appletHash);
         console.log("WhereWeServicesMock.appletInfo()", appletId, appletId);
-        if (appletId == devtestAppletId) {
+        if (devtestAppletId.equals(appletId)) {
             return {
                 appletBundleId: await fakeEntryHash(),
                 appletName: "DevTestWeApplet",
@@ -67,7 +67,7 @@ export async function createWhereWeServicesMock(devtestAppletId: string): Promis
     myWeServicesMock.assetInfo = async (wal) => {
         console.log("WhereWeServicesMock.entryInfo()", wal);
         return {
-            appletHash: decodeHashFromBase64(devtestAppletId),
+            appletHash: devtestAppletId.hash,
             assetInfo: {
                 icon_src: wrapPathInSvg(mdiClipboard),
                 name: "fake:" + encodeHashToBase64(wal.hrl[1]),
