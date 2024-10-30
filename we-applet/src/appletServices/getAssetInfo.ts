@@ -1,9 +1,9 @@
 import {asCellProxy, wrapPathInSvg} from "@ddd-qc/we-utils";
-import {AppClient, encodeHashToBase64, RoleName, ZomeName} from "@holochain/client";
+import {AppClient, encodeHashToBase64} from "@holochain/client";
 import {PlaysetEntryType, PlaysetProxy, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 import {pascal} from "@ddd-qc/cell-proxy";
 import {mdiMapbox} from "@mdi/js";
-import {RecordInfo, WAL} from "@lightningrodlabs/we-applet/dist/types";
+import {RecordInfo, WAL} from "@theweave/api";
 
 
 /** */

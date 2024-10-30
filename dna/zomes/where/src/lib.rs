@@ -4,7 +4,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_attributes)]
 
-use hdk::prelude::*;
 
 //pub mod error;
 pub mod signals;
@@ -13,7 +12,27 @@ pub mod placement_session;
 pub mod hide;
 //pub mod play;
 
+use hdk::prelude::*;
+
 pub const PLAYSET_DEFAULT_COORDINATOR_ZOME_NAME: &'static str = "where_playset";
+
+
+#[hdk_extern]
+fn get_zome_info(_:()) -> ExternResult<ZomeInfo> {
+    return zome_info();
+}
+
+
+#[hdk_extern]
+fn get_dna_info(_:()) -> ExternResult<DnaInfo> {
+    return dna_info();
+}
+
+
+#[hdk_extern]
+fn get_record_author(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
+    return zome_utils::get_author(dh);
+}
 
 
 #[hdk_extern]

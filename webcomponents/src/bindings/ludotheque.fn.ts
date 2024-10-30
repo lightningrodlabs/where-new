@@ -9,6 +9,7 @@ export const ludothequeFunctionNames: FunctionName[] = [
 	"get_zome_info", 
 	"get_dna_info",
 	"export_playset",
+	"get_record_author",
 	"create_playset",
 	"get_playset",
 	"get_all_playsets",

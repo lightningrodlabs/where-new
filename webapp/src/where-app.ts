@@ -9,7 +9,7 @@ import {
   EntryHash,
   EntryHashB64,
   InstalledAppId,
-  RoleName, ZomeName
+  RoleName, Signal, ZomeName
 } from "@holochain/client";
 import {
   AppProxy,
@@ -42,9 +42,8 @@ import "@material/mwc-circular-progress";
 import "@material/mwc-button";
 import "@material/mwc-dialog";
 import {Dialog} from "@material/mwc-dialog";
-import {AppletId, AppletView, WeaveServices} from "@lightningrodlabs/we-applet";
+import {AppletView, WeaveServices, AppletInfo} from "@theweave/api";
 import {ContextProvider} from "@lit/context";
-import {AppletInfo} from "@lightningrodlabs/we-applet/dist/types";
 import {AssetViewInfo, WeServicesEx} from "@ddd-qc/we-utils";
 import {Profile as ProfileMat, ProfilesDvm} from "@ddd-qc/profiles-dvm";
 import {weClientContext} from "@where/elements/dist/contexts";
@@ -124,7 +123,7 @@ export class WhereApp extends HappElement {
         : undefined;
     super(appWs? appWs : HC_APP_PORT, appId, adminUrl);
     if (weServices) {
-      this._weServices = new WeServicesEx(weServices, thisAppletId);
+      this._weServices = new WeServicesEx(weServices, [thisAppletId]);
       console.log(`\t\tProviding context "${weClientContext}" | in host `, this._weServices, this);
       this._weProvider = new ContextProvider(this, weClientContext, this._weServices);
     }
@@ -181,7 +180,7 @@ export class WhereApp extends HappElement {
   /** -- Methods -- */
 
   /** */
-  handleSignal(sig: AppSignal) {
+  handleSignal(sig: Signal) {
     //console.log("<where-app> handleSignal()", sig);
     this.appProxy.onSignal(sig);
   }
@@ -199,20 +198,6 @@ export class WhereApp extends HappElement {
     this.requestUpdate();
   }
 
-  async attemptEntryDefs(attempts: number, delayMs: number): Promise<boolean> {
-    while(attempts > 0) {
-      attempts -= 1;
-      const allAppEntryTypes = await this.whereDvm.fetchAllEntryDefs();
-      if (Object.values(allAppEntryTypes[WHERE_DEFAULT_COORDINATOR_ZOME_NAME]).length == 0) {
-        console.warn(`No entries found for ${WHERE_DEFAULT_COORDINATOR_ZOME_NAME}`);
-        await delay(delayMs);
-      } else {
-        // console.log("allAppEntryTypes", allAppEntryTypes)
-        return true;
-      }
-    }
-    return false;
-  }
 
   /** */
   async hvmConstructed() {
@@ -226,28 +211,7 @@ export class WhereApp extends HappElement {
       let _reply = HAPP_ELECTRON_API.sendSync('dnaHash', whereDnaHashB64);
     }
 
-    /** Probe EntryDefs */
-    this._hasHolochainFailed = !(await this.attemptEntryDefs(5, 1000));
-
-    // /** Probe we-applets */
-    // if (this._weServices) {
-    //   console.log("weServices|Probing appletInfo() by attachmentTypes")
-    //   for (const appletHash of this._weServices.attachmentTypes.keys()) {
-    //     const appletInfo = await this._weServices.appletInfo(appletHash); // FIXME: use Promise.all();
-    //     console.log("weServices|appletInfo", encodeHashToBase64(appletHash), appletInfo);
-    //     this._appInfoMap[encodeHashToBase64(appletHash)] = appletInfo;
-    //     // if (appletInfo.appletName == "files-we_applet") {
-    //     //   this._filesAppletHash = appletHash;
-    //     //   this._filesProvider = new ContextProvider(this, filesAppletContext, this._filesAppletHash);
-    //     // }
-    //     if (appletInfo.appletName == "hThreadsWeApplet") {
-    //       console.log("weServices|Threads we-applet found", encodeHashToBase64(appletHash), appletInfo.appletName);
-    //       this._threadsAppletHash = appletHash;
-    //       this._threadsProvider = new ContextProvider(this, threadsAppletContext, this._threadsAppletHash);
-    //       break;
-    //     }
-    //   }
-    // }
+    this._hasHolochainFailed = false;
 
     /** Grab ludo cells */
     this._ludoRoleCells = await this.appProxy.fetchCells(DEFAULT_WHERE_DEF.id, LudothequeDvm.DEFAULT_BASE_ROLE_NAME);

@@ -13,21 +13,18 @@ import {WhereZvm} from "./where.zvm";
 import {dematerializeSpace, SpaceMat} from "./playset.perspective";
 import {Space} from "../bindings/playset.types";
 import {
-  Here,
-  HereOutput,
   Message,
   MessageType, MessageVariantDeleteHere,
   MessageVariantNewEmojiGroup, MessageVariantNewHere, MessageVariantNewSession,
   MessageVariantNewSpace,
   MessageVariantNewSvgMarker,
   MessageVariantNewTemplate, MessageVariantUpdateHere,
-  PlacementSession,
   SignalPayload,
   WHERE_DEFAULT_ROLE_NAME
 } from "../bindings/where.types";
-import {AgentPubKeyB64, EntryHashB64, AppSignal, AppSignalCb, ActionHashB64} from "@holochain/client";
+import {AgentPubKeyB64, EntryHashB64, AppSignal, SignalCb, Signal, SignalType} from "@holochain/client";
 import {ProfilesAltZvm, ProfilesZvm} from "@ddd-qc/profiles-dvm";
-import {WAL} from "@lightningrodlabs/we-applet";
+import {WAL} from "@theweave/api";
 
 
 /** */
@@ -52,7 +49,7 @@ export class WhereDvm extends DnaViewModel {
 
   static readonly DEFAULT_BASE_ROLE_NAME = WHERE_DEFAULT_ROLE_NAME;
   static readonly ZVM_DEFS = [PlaysetZvm, WhereZvm, ProfilesAltZvm]
-  readonly signalHandler?: AppSignalCb = this.handleSignal;
+  readonly signalHandler?: SignalCb = this.handleSignal;
 
   /** QoL Helpers */
   get playsetZvm(): PlaysetZvm { return this.getZomeViewModel(PlaysetZvm.DEFAULT_ZOME_NAME) as PlaysetZvm}
@@ -92,12 +89,16 @@ export class WhereDvm extends DnaViewModel {
   /** -- Signaling -- */
 
   /** */
-  handleSignal(signal: AppSignal) {
+  handleSignal(signal: Signal) {
     console.log("Received Signal", signal);
-    if (signal.zome_name === ProfilesZvm.DEFAULT_ZOME_NAME) {
+    if (!(SignalType.App in signal)) {
       return;
     }
-    const signalPayload = signal.payload as SignalPayload;
+    const appSignal: AppSignal = signal.App;
+    if (appSignal.zome_name === ProfilesZvm.DEFAULT_ZOME_NAME) {
+      return;
+    }
+    const signalPayload = appSignal.payload as SignalPayload;
     const sType = Object.keys(signalPayload.message)[0];
     console.log("Received Signal of type", sType);
     if (!this.cell.address.agentId.equals(signalPayload.from)) {

@@ -12,6 +12,7 @@ export const playsetFunctionNames: FunctionName[] = [
 	"export_space",
 	"get_inventory",
 	"import_piece",
+	"get_record_author",
 	"create_emoji_group",
 	"get_emoji_group",
 	"get_all_emoji_groups",

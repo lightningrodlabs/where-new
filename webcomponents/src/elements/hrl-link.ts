@@ -12,14 +12,10 @@ import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import '@holochain-open-dev/elements/dist/elements/display-error.js';
 
 import { EntryHash } from '@holochain/client';
-import { DnaHash } from '@holochain/client';
-import {AppletInfo, GroupProfile, weaveUrlFromWal} from '@lightningrodlabs/we-applet';
-import { Hrl } from '@lightningrodlabs/we-applet';
-import { WeaveClient } from '@lightningrodlabs/we-applet';
+import {AppletInfo, GroupProfile, weaveUrlFromWal, Hrl, WeaveClient, AssetLocationAndInfo} from '@theweave/api';
 import { sharedStyles } from '@holochain-open-dev/elements';
 import {weClientContext} from "../contexts";
 import {WeServicesEx} from "@ddd-qc/we-utils";
-import {AssetLocationAndInfo} from "@lightningrodlabs/we-applet/dist/types";
 import {DnaId, DnaIdMap, EntryId, EntryIdMap} from "@ddd-qc/cell-proxy";
 
 

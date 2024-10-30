@@ -5,6 +5,7 @@ import {
 import {ZomeViewModel} from "@ddd-qc/lit-happ";
 import {PlaysetProxy} from "../bindings/playset.proxy";
 import {materializeSpace, dematerializeSpace, Inventory, PlaysetPerspective, SpaceMat} from "./playset.perspective";
+import {catchThrottled} from "../utils";
 
 
 /** */
@@ -80,7 +81,16 @@ export class PlaysetZvm extends ZomeViewModel {
   /** Probe */
 
   async probeInventory(): Promise<GetInventoryOutput> {
-    return this.zomeProxy.getInventory();
+    const [te, res] = await catchThrottled(this.zomeProxy.getInventory());
+    if (te) {
+      return {
+        templates: [],
+        svgMarkers: [],
+        emojiGroups: [],
+        spaces: [],
+      }
+    }
+    return res;
   }
 
   async probeTemplates() : Promise<Record<string, Template>> {

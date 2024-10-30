@@ -2,7 +2,7 @@ import {DevTestNames, setup} from "@ddd-qc/we-utils";
 import {createWhereApplet} from "./createWhereApplet";
 import {createWhereWeServicesMock} from "./createWhereWeServicesMock";
 import {PlaysetEntryType, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
-import {AppletServices} from "@lightningrodlabs/we-applet";
+import {AppletServices} from "@theweave/api";
 import {getAssetInfo} from "./appletServices/getAssetInfo";
 import {createLudoApplet} from "./createLudoApplet";
 import {search} from "./appletServices/search";

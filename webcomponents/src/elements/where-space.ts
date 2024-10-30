@@ -47,7 +47,7 @@ import {Fab} from "@material/mwc-fab";
 import {Profile as ProfileMat} from "@ddd-qc/profiles-dvm";
 import {consume} from "@lit/context";
 import {weClientContext} from "../contexts";
-import {WAL, weaveUrlFromWal} from "@lightningrodlabs/we-applet";
+import {WAL, weaveUrlFromWal} from "@theweave/api";
 import {WhereLocationDialog} from "../dialogs/where-location-dialog";
 import {WeServicesEx} from "@ddd-qc/we-utils";
 

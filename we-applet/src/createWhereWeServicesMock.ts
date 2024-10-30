@@ -3,7 +3,7 @@ import {
     encodeHashToBase64, EntryHash,
     fakeDnaHash, fakeEntryHash
 } from "@holochain/client";
-import {AppletInfo, GroupProfile, WeaveServices} from "@lightningrodlabs/we-applet";
+import {AppletInfo, GroupProfile, WeaveServices} from "@theweave/api";
 import {createDefaultWeServicesMock, wrapPathInSvg} from "@ddd-qc/we-utils";
 import {mdiClipboard, mdiFileOutline, mdiInformation} from "@mdi/js";
 import {EntryId} from "@ddd-qc/cell-proxy";

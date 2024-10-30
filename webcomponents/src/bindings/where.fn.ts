@@ -15,6 +15,7 @@ export const whereFunctionNames: FunctionName[] = [
 	"hide_space",
 	"unhide_space",
 	"get_hidden_spaces",
+	"get_record_author",
 	"get_session",
 	"get_session_from_eh",
 	"get_space_sessions",

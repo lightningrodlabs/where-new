@@ -1,9 +1,8 @@
 import {
     AppClient,
-    decodeHashFromBase64,
 } from "@holochain/client";
-import {AppletHash, WAL} from "@lightningrodlabs/we-applet/dist/types";
-import {WeaveServices} from "@lightningrodlabs/we-applet/dist/api";
+import {AppletHash, WAL} from "@theweave/api/dist/types";
+import {WeaveServices} from "@theweave/api/dist/api";
 import {asCellProxy, intoHrl} from "@ddd-qc/we-utils";
 import {PlaysetProxy, SpaceOutput, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 import {intoDhtId} from "@ddd-qc/cell-proxy";

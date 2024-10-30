@@ -5,7 +5,8 @@ import {Coord, WhereLocation, dematerializeHere, WherePerspective, LocationInfo,
 import {ZomeViewModel} from "@ddd-qc/lit-happ";
 import {SignalPayload} from "../bindings/where.types";
 import {ActionHashB64, AgentPubKeyB64, EntryHashB64} from "@holochain/client";
-import {WAL} from "@lightningrodlabs/we-applet";
+import {WAL} from "@theweave/api";
+import {catchThrottled} from "../utils";
 
 
 /**
@@ -123,7 +124,10 @@ export class WhereZvm extends ZomeViewModel {
 
   /** Returns list of hidden spaces */
   async probeVisibilityForAll(): Promise<EntryHashB64[]> {
-    const hiddens = await this.zomeProxy.getHiddenSpaces();
+    const [te, hiddens] = await catchThrottled(this.zomeProxy.getHiddenSpaces());
+    if (te) {
+      return [];
+    }
     for (const hiddenEh of hiddens) {
       if (this.getManifest(hiddenEh)) {
         this._manifests[hiddenEh].visible = false;
@@ -136,8 +140,8 @@ export class WhereZvm extends ZomeViewModel {
 
   /** */
   async probeManifest(spaceEh: EntryHashB64): Promise<PlayManifest | null> {
-      const sessionEhs = await this.zomeProxy.getSpaceSessions(spaceEh);
-      if (sessionEhs.length == 0) {
+      const [throttleError, sessionEhs] = await catchThrottled(this.zomeProxy.getSpaceSessions(spaceEh));
+      if (throttleError || sessionEhs.length == 0) {
         return null;
       }
       await this.probeVisibilityForAll(); // TODO: make this optional when probing all plays

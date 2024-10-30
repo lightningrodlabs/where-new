@@ -12,15 +12,15 @@ members = [
 
 [workspace.package]
 version = "2.0.0"
-rust-version = "1.65.0"
+rust-version = "1.70.0"
 edition = "2021"
 
 [workspace.dependencies]
-serde = { version = "=1.0.197", default-features = false }
-hdi = { version = "=0.4.1", default-features = false }
-hdk = { version = "=0.3.1", default-features = false }
+serde = { version = "=1.0.203", default-features = false }
+hdi = { version = "=0.5.0-dev.17", default-features = false }
+hdk = { version = "=0.4.0-dev.19", default-features = false }
 
-zome_utils = { git = "https://github.com/ddd-mtl/zome-utils", branch = "hdk-3.1" }
+zome_utils = { git = "https://github.com/ddd-mtl/zome-utils", branch = "hdk-4.0-dev.20" }
 
 
 [profile.dev]

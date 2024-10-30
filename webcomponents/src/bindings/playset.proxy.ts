@@ -103,6 +103,10 @@ export class PlaysetProxy extends ZomeProxy {
     return this.call('import_piece', input);
   }
 
+  async getRecordAuthor(dh: AnyDhtArray): Promise<AgentArray> {
+    return this.call('get_record_author', dh);
+  }
+
   async createEmojiGroup(input: EmojiGroup): Promise<EntryHashB64> {
     return this.call('create_emoji_group', input);
   }

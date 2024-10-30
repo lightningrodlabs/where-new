@@ -115,6 +115,10 @@ export class WhereProxy extends ZomeProxy {
     return this.call('get_hidden_spaces', null);
   }
 
+  async getRecordAuthor(dh: AnyDhtArray): Promise<AgentArray> {
+    return this.call('get_record_author', dh);
+  }
+
   async getSession(input: GetSessionInput): Promise<EntryHashB64 | null> {
     return this.call('get_session', input);
   }

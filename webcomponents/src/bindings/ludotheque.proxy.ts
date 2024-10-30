@@ -91,6 +91,10 @@ export class LudothequeProxy extends ZomeProxy {
     return this.call('export_playset', input);
   }
 
+  async getRecordAuthor(dh: AnyDhtArray): Promise<AgentArray> {
+    return this.call('get_record_author', dh);
+  }
+
   async createPlayset(input: Playset): Promise<EntryHashB64> {
     return this.call('create_playset', input);
   }

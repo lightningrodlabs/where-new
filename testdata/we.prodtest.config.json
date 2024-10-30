@@ -1,0 +1,46 @@
+{
+  "groups": [
+    {
+      "name": "Cdric",
+      "networkSeed": "test",
+      "icon": {
+        "type": "filesystem",
+        "path": "testdata/cdric.png"
+      },
+      "creatingAgent": {
+        "agentIdx": 1,
+        "agentProfile": {
+          "nickname": "Alex",
+          "avatar": {
+            "type": "filesystem",
+            "path": "testdata/alex.jpg"
+          }
+        }
+      },
+      "joiningAgents": [],
+      "applets": [
+        {
+          "name": "Where",
+          "instanceName": "Where",
+          "registeringAgent": 1,
+          "joiningAgents": []
+        }
+      ]
+    }
+  ],
+  "applets": [
+    {
+      "name": "Where",
+      "subtitle": "Group map\n",
+      "description": "...",
+      "icon": {
+        "type": "filesystem",
+        "path": "./webapp/logo.svg"
+      },
+      "source": {
+        "type": "filesystem",
+        "path": "./artifacts/where-we_applet.webhapp"
+      }
+    }
+  ]
+}

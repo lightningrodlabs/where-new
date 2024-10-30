@@ -3,7 +3,7 @@ import {MarkerType, SpaceMat} from "./playset.perspective";
 import {mapReplacer, mapReviver} from "../utils";
 import {ActionHashB64, AgentPubKeyB64, EntryHashB64} from "@holochain/client";
 import {Dictionary} from "@ddd-qc/cell-proxy";
-import {WAL} from "@lightningrodlabs/we-applet";
+import {WAL} from "@theweave/api";
 
 
 /** */

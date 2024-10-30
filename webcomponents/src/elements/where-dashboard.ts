@@ -2,11 +2,11 @@ import {css, html} from "lit";
 import {property, state, customElement} from "lit/decorators.js";
 import {consume} from "@lit/context";
 
-import {CreatableType, Hrl, WeaveClient} from "@lightningrodlabs/we-applet";
+import {CreatableType, Hrl, WeaveClient} from "@theweave/api";
 
 import {sharedStyles} from "../sharedStyles";
 
-import {decodeHashFromBase64, EntryHash, EntryHashB64} from "@holochain/client";
+import {decodeHashFromBase64, encodeHashToBase64, EntryHash, EntryHashB64} from "@holochain/client";
 
 import {delay, DnaElement, HAPP_ENV, HappEnvType, intoDhtId} from "@ddd-qc/lit-happ";
 import {Dictionary, EntryIdMap} from "@ddd-qc/cell-proxy";
@@ -55,7 +55,7 @@ import "@material/mwc-button";
 import "@material/mwc-fab";
 import "@material/mwc-icon-button-toggle";
 import "@material/mwc-textfield";
-import {AppletInfo} from "@lightningrodlabs/we-applet/dist/types";
+import {AppletInfo} from "@theweave/api";
 import {Profile as  ProfileMat} from "@ddd-qc/profiles-dvm";
 import {weClientContext} from "../contexts";
 import {getAppletsInfosAndGroupsProfiles} from "./hrl-link";
@@ -182,7 +182,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
     if (this.weServices) {
       const {groupsProfiles, appletsInfos} = await getAppletsInfosAndGroupsProfiles(
         this.weServices as unknown as WeaveClient,
-        [decodeHashFromBase64(this.weServices.appletId)],
+        this.weServices.appletIds.map((b64) => decodeHashFromBase64(b64)),
       );
       this._appletsInfos = appletsInfos;
     }
@@ -452,37 +452,37 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
         // FIXME
         const threadAttachment = this.getThreadAttachmentType();
 
-        if (threadAttachment) {
-        for (const [appletHash, atts] of this.weServices.attachmentTypes) {
-          for (const [attName, attType] of Object.entries(atts)) {
-            const attIcon = html`
-              <sl-tooltip style="--max-width: 30rem;">
-              <div slot="content">
-                <div class="row" style="align-items: center">
-                  <span><strong>${attName}&nbsp;</strong></span>
-                  <span style="margin-right:6px;">from ${this._appletsInfos.get(appletHash)?.appletName}</span>
-                </div>
-              </div>
-                <sl-icon-button .src=${attType.icon_src}
-                                @click=${async () => {
-                                  const spaceHrl: Hrl = [decodeHashFromBase64(this.cell.dnaHash), decodeHashFromBase64(spaceEh)];
-                                  console.log("Create/Open attachment:", spaceHrl);
-                                  const context = {
-                                    subjectType: PlaysetEntryType.Space,
-                                    subjectName: play.space.name,
-                                  };
-                                  const res = await attType.create({hrl: spaceHrl, context});
-                                  console.log("Create/Open attachment result:", res);
-                                  res.context.subjectType = PlaysetEntryType.Space;
-                                  //res.context.subjectName = play.space.name;
-                                  this.weServices.openHrl({hrl: res.hrl, context: res.context});
-                                }}
-                ></sl-icon-button>
-              </sl-tooltip>
-            `;
-            attIcons.push(attIcon);
-          }
-        }
+        //if (threadAttachment) {
+        // for (const [appletHash, atts] of this.weServices.attachmentTypes) {
+        //   for (const [attName, attType] of Object.entries(atts)) {
+        //     const attIcon = html`
+        //       <sl-tooltip style="--max-width: 30rem;">
+        //       <div slot="content">
+        //         <div class="row" style="align-items: center">
+        //           <span><strong>${attName}&nbsp;</strong></span>
+        //           <span style="margin-right:6px;">from ${this._appletsInfos.get(appletHash)?.appletName}</span>
+        //         </div>
+        //       </div>
+        //         <sl-icon-button .src=${attType.icon_src}
+        //                         @click=${async () => {
+        //                           const spaceHrl: Hrl = [decodeHashFromBase64(this.cell.dnaHash), decodeHashFromBase64(spaceEh)];
+        //                           console.log("Create/Open attachment:", spaceHrl);
+        //                           const context = {
+        //                             subjectType: PlaysetEntryType.Space,
+        //                             subjectName: play.space.name,
+        //                           };
+        //                           const res = await attType.create({hrl: spaceHrl, context});
+        //                           console.log("Create/Open attachment result:", res);
+        //                           res.context.subjectType = PlaysetEntryType.Space;
+        //                           //res.context.subjectName = play.space.name;
+        //                           this.weServices.openHrl({hrl: res.hrl, context: res.context});
+        //                         }}
+        //         ></sl-icon-button>
+        //       </sl-tooltip>
+        //     `;
+        //     attIcons.push(attIcon);
+        //   }
+        // }
 
 
         /** */

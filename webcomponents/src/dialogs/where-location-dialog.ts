@@ -38,7 +38,7 @@ import {TextField} from "@material/mwc-textfield";
 import {Dialog} from "@material/mwc-dialog";
 import {consume} from "@lit/context";
 import {weClientContext} from "../contexts";
-import {WAL} from "@lightningrodlabs/we-applet";
+import {WAL} from "@theweave/api";
 import {Profile as ProfileMat} from "@ddd-qc/profiles-dvm/dist/bindings/profiles.types";
 import {WhereDnaPerspective, WhereDvm} from "../viewModels/where.dvm";
 import {WeServicesEx} from "@ddd-qc/we-utils";

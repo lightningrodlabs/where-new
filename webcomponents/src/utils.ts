@@ -22,6 +22,19 @@ export function str2obj(input: string): { [key: string]: null } {
 // }
 
 
+/** Better way to catch and handle "throttled" error */
+export function catchThrottled<T>(promise: Promise<T>): Promise<[undefined, T] | [Error]> {
+  return promise
+    .then(data => [undefined, data] as [undefined, T])
+    .catch(error => {
+      if (error.throttled) {
+        return [error];
+      }
+      throw error;
+    })
+}
+
+
 /**
  *
  * @param key

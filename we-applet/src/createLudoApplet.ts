@@ -7,7 +7,7 @@ import {
 import {
   RenderInfo,
   WeaveServices,
-} from "@lightningrodlabs/we-applet";
+} from "@theweave/api";
 
 
 import {AppletViewInfo} from "@ddd-qc/we-utils";
