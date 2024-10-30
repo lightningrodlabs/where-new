@@ -445,41 +445,46 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
         //console.log("canComment", this.canComment());
         //const template = this._dvm.playsetZvm.getTemplate(play.space.origin);
         //const r = play.space.surface.size.x / play.space.surface.size.y;
-        // const threadAttachment = this.getThreadAttachmentType();
+
         // let threadIcon = html``;
-        // if (threadAttachment) {
+
         let attIcons = [];
         // FIXME
-        // for (const [appletHash, atts] of this.weServices.attachmentTypes) {
-        //   for (const [attName, attType] of Object.entries(atts)) {
-        //     const attIcon = html`
-        //       <sl-tooltip style="--max-width: 30rem;">
-        //       <div slot="content">
-        //         <div class="row" style="align-items: center">
-        //           <span><strong>${attName}&nbsp;</strong></span>
-        //           <span style="margin-right:6px;">from ${this._appletsInfos.get(appletHash)?.appletName}</span>
-        //         </div>
-        //       </div>
-        //         <sl-icon-button .src=${attType.icon_src}
-        //                         @click=${async () => {
-        //                           const spaceHrl: Hrl = [decodeHashFromBase64(this.cell.dnaHash), decodeHashFromBase64(spaceEh)];
-        //                           console.log("Create/Open attachment:", spaceHrl);
-        //                           const context = {
-        //                             subjectType: PlaysetEntryType.Space,
-        //                             subjectName: play.space.name,
-        //                           };
-        //                           const res = await attType.create({hrl: spaceHrl, context});
-        //                           console.log("Create/Open attachment result:", res);
-        //                           res.context.subjectType = PlaysetEntryType.Space;
-        //                           //res.context.subjectName = play.space.name;
-        //                           this.weServices.openHrl({hrl: res.hrl, context: res.context});
-        //                         }}
-        //         ></sl-icon-button>
-        //       </sl-tooltip>
-        //     `;
-        //     attIcons.push(attIcon);
-        //   }
-        // }
+        const threadAttachment = this.getThreadAttachmentType();
+
+        if (threadAttachment) {
+        for (const [appletHash, atts] of this.weServices.attachmentTypes) {
+          for (const [attName, attType] of Object.entries(atts)) {
+            const attIcon = html`
+              <sl-tooltip style="--max-width: 30rem;">
+              <div slot="content">
+                <div class="row" style="align-items: center">
+                  <span><strong>${attName}&nbsp;</strong></span>
+                  <span style="margin-right:6px;">from ${this._appletsInfos.get(appletHash)?.appletName}</span>
+                </div>
+              </div>
+                <sl-icon-button .src=${attType.icon_src}
+                                @click=${async () => {
+                                  const spaceHrl: Hrl = [decodeHashFromBase64(this.cell.dnaHash), decodeHashFromBase64(spaceEh)];
+                                  console.log("Create/Open attachment:", spaceHrl);
+                                  const context = {
+                                    subjectType: PlaysetEntryType.Space,
+                                    subjectName: play.space.name,
+                                  };
+                                  const res = await attType.create({hrl: spaceHrl, context});
+                                  console.log("Create/Open attachment result:", res);
+                                  res.context.subjectType = PlaysetEntryType.Space;
+                                  //res.context.subjectName = play.space.name;
+                                  this.weServices.openHrl({hrl: res.hrl, context: res.context});
+                                }}
+                ></sl-icon-button>
+              </sl-tooltip>
+            `;
+            attIcons.push(attIcon);
+          }
+        }
+
+
         /** */
         return html`
           <sl-card class="card-image" >
