@@ -3,7 +3,7 @@ import {AppClient, encodeHashToBase64} from "@holochain/client";
 import {PlaysetEntryType, PlaysetProxy, WHERE_DEFAULT_ROLE_NAME} from "@where/elements";
 import {pascal} from "@ddd-qc/cell-proxy";
 import {mdiMapbox} from "@mdi/js";
-import {RecordInfo, WAL} from "@theweave/api";
+import {AssetInfo, RecordInfo, WAL} from "@theweave/api";
 
 
 /** */
@@ -12,6 +12,10 @@ export async function getAssetInfo(
   wal: WAL,
   recordInfo?: RecordInfo,
 ) {
+    console.log("Where/we-applet: getAssetInfo", recordInfo);
+    if (!recordInfo) {
+        throw new Error(`Where/we-applet: Missing recordInfo.`);
+    }
     if (recordInfo.roleName != WHERE_DEFAULT_ROLE_NAME) {
         throw new Error(`Where/we-applet: Unknown role name '${recordInfo.roleName}'.`);
     }
@@ -24,7 +28,7 @@ export async function getAssetInfo(
 
     switch (pEntryType) {
         case PlaysetEntryType.Space: {
-            console.log("Where/we-applet: space info for", wal);
+            console.debug("Where/we-applet: space info for", wal);
             const cellProxy = await asCellProxy(
                 appletClient,
                 undefined, //hrl[0],
@@ -32,15 +36,20 @@ export async function getAssetInfo(
                 WHERE_DEFAULT_ROLE_NAME,
             );
             const proxy: PlaysetProxy = new PlaysetProxy(cellProxy);
-            const space = await proxy.getSpace(encodeHashToBase64(wal.hrl[1]));
+            const spaceEh = encodeHashToBase64(wal.hrl[1]);
+            const space = await proxy.getSpace(spaceEh);
             if (!space) {
+                console.debug("Where/we-applet: space NOT FOUND", spaceEh);
                 return;
             }
+            const icon_src = wrapPathInSvg(mdiMapbox)
+            console.debug("Where/we-applet: space FOUND", spaceEh, space.name, icon_src);
             return {
-                icon_src: wrapPathInSvg(mdiMapbox),
+                icon_src,
                 name: space.name,
-            };
+            } as AssetInfo;
         }
+        break;
         default:
             throw new Error(`Files/we-applet: Unknown entry type ${recordInfo.entryType}.`);
     }

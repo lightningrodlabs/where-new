@@ -498,6 +498,7 @@ export class WhereDashboard extends DnaElement<WhereDnaPerspective, WhereDvm> {
                       style="cursor:pointer;"
                       @click=${ async () => {
                         const spaceHrl: Hrl = intoHrl(this.cell.address.dnaId, intoDhtId(spaceEh));
+                          console.debug("Copy space to pocket", spaceEh, spaceHrl);
                         this.weServices.walToPocket({hrl: spaceHrl, context: null});
                       }}
             >content_copy</mwc-icon>` :html``}
